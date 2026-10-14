@@ -155,3 +155,9 @@
 .custom-shadow-lvl3 {
   box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.08), 0 24px 38px -4px rgba(0, 0, 0, 0.06);
 }
+
+@layer base {
+  h1 { @apply text-4xl font-bold tracking-tight mb-4; }
+  h2 { @apply text-2xl font-semibold mb-3; }
+  p  { @apply text-[0.9rem] leading-relaxed mb-4 text-neutral-300; }
+}

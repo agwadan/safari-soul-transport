@@ -12,7 +12,7 @@ function TopBar() {
           </span>
           <span className="inline-flex items-center gap-1 hover:text-[#e5a910] transition-colors cursor-pointer text-gray-300">
             <span className="material-symbols-outlined text-[16px]">call</span>
-            +254 (0) 20 794 6000 / +256 700 123 456
+            +254 (0) 792 485 814 / +256 (0) 705 530 039
           </span>
         </div>
         <div className="flex items-center">
@@ -43,7 +43,7 @@ function Header() {
           </div>
           <div className="flex flex-col">
             <span className="font-display-hero text-headline-md font-bold tracking-tight text-[#0a0a0a]">
-              AeroTransit
+              SafariSoul
             </span>
             <span className="font-label-sm text-[10px] tracking-widest text-[#77767b] font-bold">
               EXECUTIVE MOBILITY
@@ -128,7 +128,7 @@ function Hero() {
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 w-fit mb-6 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-[#e5a910] animate-pulse"></span>
               <span className="font-label-sm text-label-sm text-white font-bold tracking-wide">
-                EAST AFRICA EXECUTIVE AIRPORT TRANSFERS &amp; CHAUFFEUR SERVICES
+                EAST AFRICA EXECUTIVE AIRPORT TRANSFERS
               </span>
             </div>
             <h1 className="font-display-hero text-display-hero font-bold text-white tracking-tight mb-4 drop-shadow-sm">
@@ -137,9 +137,10 @@ function Hero() {
               <span className="text-[#e5a910]">Right on time.</span>
             </h1>
             <p className="font-body-lg text-body-lg text-gray-300 mb-8 max-w-xl leading-relaxed">
-              Premium executive airport transfers across JKIA Nairobi &amp; Entebbe
-              International, VIP hotel connections, and seamless intercity
-              travel with automated flight telemetry and zero surge pricing.
+              Premium executive airport transfers across JKIA Nairobi &amp;
+              Entebbe International, VIP hotel connections, and seamless
+              intercity travel with automated flight telemetry and zero surge
+              pricing.
             </p>
             <div className="grid grid-cols-2 gap-3 mb-8">
               {[
@@ -384,7 +385,7 @@ function Hero() {
   );
 }
 
-function AeroTransitStandard() {
+function SafariSoulStandard() {
   const standards = [
     {
       icon: "radar",
@@ -421,11 +422,12 @@ function AeroTransitStandard() {
               Executive Transport Benchmark
             </span>
             <h2 className="font-headline-lg text-headline-lg font-bold text-[#0a0a0a]">
-              The AeroTransit Standard
+              The SafariSoul Standard
             </h2>
           </div>
           <p className="font-body-md text-body-md text-on-surface-variant max-w-md mt-3 md:mt-0">
-            Engineered for frictionless corporate journeys and international arrivals where timing is absolute.
+            Engineered for frictionless corporate journeys and international
+            arrivals where timing is absolute.
           </p>
         </div>
 
@@ -527,7 +529,10 @@ function FleetShowcase() {
   ];
 
   return (
-    <section className="py-16 bg-background border-b border-border-hairline" id="fleet">
+    <section
+      className="py-16 bg-background border-b border-border-hairline"
+      id="fleet"
+    >
       <div className="max-w-7xl mx-auto px-margin">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
           <div>
@@ -670,7 +675,10 @@ function MobilityServices() {
   ];
 
   return (
-    <section className="py-16 bg-white border-b border-border-hairline" id="services">
+    <section
+      className="py-16 bg-white border-b border-border-hairline"
+      id="services"
+    >
       <div className="max-w-7xl mx-auto px-margin">
         <div className="mb-10 text-center max-w-2xl mx-auto">
           <span className="font-label-sm text-label-sm font-bold tracking-wider text-[#b27c00] uppercase mb-2 block">
@@ -680,7 +688,8 @@ function MobilityServices() {
             Tailored Mobility Services
           </h2>
           <p className="font-body-md text-body-md text-on-surface-variant">
-            Beyond airport connections: dedicated chauffeur solutions designed for executive schedules and discerning corporate itineraries.
+            Beyond airport connections: dedicated chauffeur solutions designed
+            for executive schedules and discerning corporate itineraries.
           </p>
         </div>
 
@@ -742,7 +751,10 @@ function HowItWorks() {
   ];
 
   return (
-    <section className="py-16 bg-background border-b border-border-hairline" id="how-it-works">
+    <section
+      className="py-16 bg-background border-b border-border-hairline"
+      id="how-it-works"
+    >
       <div className="max-w-7xl mx-auto px-margin">
         <div className="text-center max-w-xl mx-auto mb-14">
           <span className="font-label-sm text-label-sm font-bold tracking-wider text-[#b27c00] uppercase mb-2 block">
@@ -752,7 +764,8 @@ function HowItWorks() {
             Booked in Under 60 Seconds
           </h2>
           <p className="font-body-md text-body-md text-on-surface-variant">
-            We handle the logistics, flight adjustments, and terminal parking while you concentrate on your journey.
+            We handle the logistics, flight adjustments, and terminal parking
+            while you concentrate on your journey.
           </p>
         </div>
 
@@ -810,7 +823,8 @@ function TrustCredentials() {
                 </div>
               </div>
               <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-                Verified by 18,400+ executive business passengers and airline crew members worldwide.
+                Verified by 18,400+ executive business passengers and airline
+                crew members worldwide.
               </p>
             </div>
           </div>
@@ -858,11 +872,13 @@ function Footer() {
                 </span>
               </div>
               <span className="font-display-hero text-headline-md font-bold text-white">
-                AeroTransit
+                SafariSoul
               </span>
             </div>
             <p className="font-body-sm text-body-sm text-neutral-400 max-w-sm mb-6 leading-relaxed">
-              Premium executive chauffeur and high-reliability airport transit service operating throughout major airports, financial hubs, and private aviation terminals.
+              Premium executive chauffeur and high-reliability airport transit
+              service operating throughout major airports, financial hubs, and
+              private aviation terminals.
             </p>
           </div>
 
@@ -873,17 +889,26 @@ function Footer() {
             </h4>
             <ul className="space-y-2.5 font-body-sm text-body-sm text-neutral-400">
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link
+                  className="hover:text-[#e5a910] transition-colors"
+                  href="#"
+                >
                   Jomo Kenyatta Int&apos;l (JKIA - Nairobi)
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link
+                  className="hover:text-[#e5a910] transition-colors"
+                  href="#"
+                >
                   Wilson Airport (WIL - Nairobi)
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link
+                  className="hover:text-[#e5a910] transition-colors"
+                  href="#"
+                >
                   Entebbe International (EBB - Uganda)
                 </Link>
               </li>
@@ -897,22 +922,34 @@ function Footer() {
             </h4>
             <ul className="space-y-2.5 font-body-sm text-body-sm text-neutral-400">
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link
+                  className="hover:text-[#e5a910] transition-colors"
+                  href="#"
+                >
                   Airport Transfers
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link
+                  className="hover:text-[#e5a910] transition-colors"
+                  href="#"
+                >
                   City Transfers
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link
+                  className="hover:text-[#e5a910] transition-colors"
+                  href="#"
+                >
                   Intercity Travel
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link
+                  className="hover:text-[#e5a910] transition-colors"
+                  href="#"
+                >
                   Event Logistics
                 </Link>
               </li>
@@ -929,27 +966,42 @@ function Footer() {
             </h4>
             <ul className="space-y-2.5 font-body-sm text-body-sm text-neutral-400">
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link
+                  className="hover:text-[#e5a910] transition-colors"
+                  href="#"
+                >
                   Support &amp; FAQ
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link
+                  className="hover:text-[#e5a910] transition-colors"
+                  href="#"
+                >
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link
+                  className="hover:text-[#e5a910] transition-colors"
+                  href="#"
+                >
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link
+                  className="hover:text-[#e5a910] transition-colors"
+                  href="#"
+                >
                   Safety Standards
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link
+                  className="hover:text-[#e5a910] transition-colors"
+                  href="#"
+                >
                   Careers &amp; Chauffeurs
                 </Link>
               </li>
@@ -986,7 +1038,7 @@ export default function Page() {
       <Header />
       <main>
         <Hero />
-        <AeroTransitStandard />
+        <SafariSoulStandard />
         <FleetShowcase />
         <MobilityServices />
         <HowItWorks />

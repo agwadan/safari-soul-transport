@@ -5,7 +5,7 @@ import "./globals.css";
 const manrope = Manrope({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AeroTransit — Executive Airport Transfers & Chauffeur Services",
+  title: "SafariSoul — Executive Airport Transfers & Chauffeur Services",
   description: "Executive Mobility",
 };
 
