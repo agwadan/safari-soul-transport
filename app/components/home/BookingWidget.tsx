@@ -1,187 +1,231 @@
+"use client";
+
+import { useCallback, useState } from "react";
+import ConfirmationModal from "./ConfirmationModal";
+import {
+  Counts,
+  DEFAULT_COUNTS,
+  DEFAULT_TRIP,
+  TripDetails,
+} from "../data/booking";
+
+const counters: {
+  key: keyof Counts;
+  label: string;
+  hint: string;
+  icon: string;
+  min: number;
+  max: number;
+}[] = [
+  { key: "passengers", label: "Passengers", hint: "Adults & children", icon: "group", min: 1, max: 20 },
+  { key: "suitcases", label: "Checked suitcases", hint: "Large / standard", icon: "luggage", min: 0, max: 20 },
+  { key: "handbags", label: "Cabin bags", hint: "Small bags & carry-ons", icon: "work", min: 0, max: 20 },
+];
+
+const field =
+  "w-full h-14 bg-neutral-100 border border-transparent rounded-xl font-body-md text-body-md text-[#0a0a0a] placeholder:text-neutral-400 focus:bg-white focus:border-[#0a0a0a] focus:ring-2 focus:ring-[#e5a910]/30 outline-none transition-all";
+const label = "block font-label-sm text-label-sm font-semibold text-[#0a0a0a] mb-2";
+const icon = "absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-[20px]";
+
+const todayLocal = () => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
 export default function BookingWidget() {
-  const inputBase =
-    "w-full h-12 bg-surface-container-low border border-border-hairline rounded-lg font-body-md text-body-md text-[#0a0a0a] focus:bg-white focus:border-[#0a0a0a] focus:ring-2 focus:ring-[#e5a910]/30 transition-all font-medium";
+  const [step, setStep] = useState<1 | 2>(1);
+  const [trip, setTrip] = useState<TripDetails>(DEFAULT_TRIP);
+  const [counts, setCounts] = useState<Counts>(DEFAULT_COUNTS);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [modalOpen, setModalOpen] = useState(false);
+  const closeModal = useCallback(() => setModalOpen(false), []);
+
+  const set = (k: keyof TripDetails) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setTrip((t) => ({ ...t, [k]: e.target.value }));
+
+  const adjust = (key: keyof Counts, delta: number, min: number, max: number) =>
+    setCounts((c) => ({ ...c, [key]: Math.min(max, Math.max(min, c[key] + delta)) }));
+
+  function next(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const found: Record<string, string> = {};
+    (["pickup", "destination", "date", "time"] as const).forEach((k) => {
+      if (!trip[k].trim()) found[k] = "Required";
+    });
+    if (trip.date && trip.date < todayLocal()) found.date = "Date is in the past";
+    setErrors(found);
+    if (Object.keys(found).length === 0) setStep(2);
+  }
+
+  const err = (k: string) =>
+    errors[k] ? <p className="mt-1 text-xs text-[#ba1a1a]">{errors[k]}</p> : null;
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-xl border border-white/40 custom-shadow-lvl3 p-6 sm:p-8 relative ring-1 ring-black/5">
-      <div className="flex items-center justify-between pb-5 mb-6 border-b border-border-hairline">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-[#0a0a0a] text-[#e5a910] flex items-center justify-center shadow-sm">
-            <span
-              className="material-symbols-outlined text-[20px]"
-              style={{ fontVariationSettings: "'FILL' 1" }}
-            >
-              flight_land
-            </span>
-          </div>
-          <div>
-            <h2 className="font-headline-sm text-headline-sm font-bold text-[#0a0a0a]">
-              Airport Pickup Transfer
-            </h2>
-            <p className="font-label-sm text-label-sm text-on-surface-variant">
-              Private chauffeur meet &amp; greet at arrivals
-            </p>
-          </div>
+    <div className="bg-white rounded-3xl custom-shadow-lvl3 p-6 sm:p-10">
+      {/* Title */}
+      <div className="flex items-center gap-3.5 pb-6 mb-6 border-b border-neutral-200">
+        <div className="w-12 h-12 rounded-xl bg-[#0a0a0a] text-[#e5a910] flex items-center justify-center">
+          <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+            flight_land
+          </span>
         </div>
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-low border border-border-hairline text-on-surface-variant font-label-sm text-label-sm shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-[#d49b0e] animate-pulse"></span>
-          <span className="hidden sm:inline font-medium text-[#0a0a0a]">
-            JKIA &amp; EBB Radar Active
+        <h2 className="font-headline-sm text-headline-sm font-bold text-[#0a0a0a]">
+          Airport Pickup Transfer
+        </h2>
+      </div>
+
+      {/* Progress */}
+      <div className="mb-8" aria-label={`Step ${step} of 2`}>
+        <div className="flex items-center justify-between font-label-sm text-label-sm tracking-wide">
+          <span className={`flex items-center gap-2 font-semibold ${step === 1 ? "text-[#0a0a0a]" : "text-neutral-400"}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step === 1 ? "bg-[#0a0a0a] text-white" : "bg-neutral-200 text-neutral-500"}`}>
+              {step === 2 ? "✓" : "1"}
+            </span>
+            <span className="hidden sm:inline">Trip &amp; Flight Details</span>
+            <span className="sm:hidden">Trip</span>
           </span>
-          <span className="sm:hidden font-medium text-[#0a0a0a]">
-            Radar Active
+          <span className="text-neutral-400">Step {step} of 2</span>
+          <span className={`flex items-center gap-2 font-semibold ${step === 2 ? "text-[#0a0a0a]" : "text-neutral-400"}`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step === 2 ? "bg-[#0a0a0a] text-white" : "bg-neutral-200 text-neutral-500"}`}>
+              2
+            </span>
+            <span className="hidden sm:inline">Passengers &amp; Luggage</span>
+            <span className="sm:hidden">Luggage</span>
           </span>
+        </div>
+        <div className="mt-3 h-1.5 rounded-full bg-neutral-200 overflow-hidden">
+          <div
+            className="h-full rounded-full bg-[#e5a910] transition-all duration-300"
+            style={{ width: step === 1 ? "50%" : "100%" }}
+          />
         </div>
       </div>
 
-      <div className="space-y-4">
-        {/* Row 1: Pickup Airport & Flight Number */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
-          <div className="md:col-span-7">
-            <label className="block font-label-sm text-label-sm font-semibold text-[#0a0a0a] mb-1.5">
-              Pickup Airport / Terminal
-            </label>
-            <div className="relative flex items-center">
-              <span className="absolute left-3.5 material-symbols-outlined text-[#77767b] text-[20px]">
-                local_airport
-              </span>
-              <input
-                className={`${inputBase} pl-11 pr-4`}
-                type="text"
-                defaultValue="Jomo Kenyatta Int'l Airport (JKIA) - Terminal 1A/1E"
-              />
+      {step === 1 ? (
+        <form onSubmit={next} noValidate className="space-y-5">
+          <div>
+            <label htmlFor="pickup" className={label}>Pickup Airport / Terminal</label>
+            <div className="relative">
+              <span className={`${icon} text-neutral-500`}>local_airport</span>
+              <input id="pickup" className={`${field} pl-12 pr-4`} value={trip.pickup} onChange={set("pickup")} />
+            </div>
+            {err("pickup")}
+          </div>
+
+          <div>
+            <label htmlFor="destination" className={label}>Destination Address or Hotel</label>
+            <div className="relative">
+              <span className={`${icon} text-[#ba1a1a]`}>location_on</span>
+              <input id="destination" className={`${field} pl-12 pr-4`} placeholder="Hotel or address" value={trip.destination} onChange={set("destination")} />
+            </div>
+            {err("destination")}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label htmlFor="date" className={label}>Pickup Date</label>
+              <div className="relative">
+                <span className={`${icon} text-neutral-500`}>calendar_today</span>
+                <input id="date" type="date" className={`${field} pl-12 pr-4`} value={trip.date} onChange={set("date")} />
+              </div>
+              {err("date")}
+            </div>
+            <div>
+              <label htmlFor="time" className={label}>Estimated Landing Time</label>
+              <div className="relative">
+                <span className={`${icon} text-neutral-500`}>schedule</span>
+                <input id="time" type="time" className={`${field} pl-12 pr-4`} value={trip.time} onChange={set("time")} />
+              </div>
+              {err("time")}
             </div>
           </div>
-          <div className="md:col-span-5">
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="font-label-sm text-label-sm font-semibold text-[#0a0a0a]">
-                Flight Number
+
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label htmlFor="flight" className="font-label-sm text-label-sm font-semibold text-[#0a0a0a]">
+                Flight Number <span className="font-normal text-neutral-400">(Optional)</span>
               </label>
-              <span className="bg-[#FDF6E2] text-[#9a6f05] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#f5de99]">
+              <span className="bg-[#FDF6E2] text-[#9a6f05] text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-[#f5de99]">
                 Radar Tracked
               </span>
             </div>
-            <div className="relative flex items-center">
-              <span className="absolute left-3.5 material-symbols-outlined text-[#d49b0e] text-[20px]">
-                flight
-              </span>
-              <input
-                className={`${inputBase} pl-11 pr-4`}
-                type="text"
-                defaultValue="KQ 101 (London LHR → NBO)"
-              />
+            <div className="relative">
+              <span className={`${icon} text-[#d49b0e]`}>flight</span>
+              <input id="flight" className={`${field} pl-12 pr-4`} placeholder="e.g. KQ 101" value={trip.flight} onChange={set("flight")} />
             </div>
           </div>
-        </div>
 
-        {/* Row 2: Destination */}
-        <div>
-          <label className="block font-label-sm text-label-sm font-semibold text-[#0a0a0a] mb-1.5">
-            Destination Address or Hotel
-          </label>
-          <div className="relative flex items-center">
-            <span className="absolute left-3.5 material-symbols-outlined text-[#ba1a1a] text-[20px]">
-              location_on
-            </span>
-            <input
-              className={`${inputBase} pl-11 pr-10`}
-              type="text"
-              defaultValue="Villa Rosa Kempinski, Chiromo Rd, Westlands, Nairobi"
-            />
-            <button
-              className="absolute right-3 text-[#77767b] hover:text-[#0a0a0a] transition-colors"
-              title="Recent destination presets"
-              type="button"
-            >
-              <span className="material-symbols-outlined text-[18px]">
-                history
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Row 3: Date, Time, Party/Luggage */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          <div>
-            <label className="block font-label-sm text-label-sm font-semibold text-[#0a0a0a] mb-1.5">
-              Pickup Date
-            </label>
-            <div className="relative flex items-center">
-              <span className="absolute left-3.5 material-symbols-outlined text-[#77767b] text-[20px]">
-                calendar_today
-              </span>
-              <input
-                className={`${inputBase} pl-11 pr-3 text-sm`}
-                type="text"
-                defaultValue="Tomorrow, Fri Oct 24"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block font-label-sm text-label-sm font-semibold text-[#0a0a0a] mb-1.5">
-              Estimated Landing Time
-            </label>
-            <div className="relative flex items-center">
-              <span className="absolute left-3.5 material-symbols-outlined text-[#77767b] text-[20px]">
-                schedule
-              </span>
-              <input
-                className={`${inputBase} pl-11 pr-3 text-sm`}
-                type="text"
-                defaultValue="14:30 EAT (Local)"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block font-label-sm text-label-sm font-semibold text-[#0a0a0a] mb-1.5">
-              Party &amp; Luggage
-            </label>
-            <div className="relative flex items-center">
-              <span className="absolute left-3.5 material-symbols-outlined text-[#77767b] text-[20px]">
-                group
-              </span>
-              <button
-                className="w-full h-12 pl-11 pr-3 bg-surface-container-low border border-border-hairline rounded-lg font-body-md text-body-md text-[#0a0a0a] text-left flex items-center justify-between font-medium hover:border-[#0a0a0a] transition-colors"
-                type="button"
-              >
-                <span className="truncate text-sm">2 Pax • 2 Bags</span>
-                <span className="material-symbols-outlined text-[18px] text-[#77767b]">
-                  expand_more
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Submit */}
-        <div className="pt-2.5">
           <button
-            className="w-full h-[52px] bg-[#0a0a0a] hover:bg-[#1f1f1f] text-white rounded-lg font-headline-sm text-headline-sm flex items-center justify-center gap-3 transition-all duration-150 shadow-md hover:shadow-lg active:scale-[0.99] group border border-[#0a0a0a]"
-            type="button"
+            type="submit"
+            className="group w-full h-14 bg-[#0a0a0a] hover:bg-[#1f1f1f] text-white rounded-xl font-headline-sm text-headline-sm flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
           >
-            <span>Find a Chauffeur — From KES 4,500 ($35)</span>
+            Continue to Passengers &amp; Luggage
             <span className="material-symbols-outlined text-[20px] text-[#e5a910] transition-transform group-hover:translate-x-1">
               arrow_forward
             </span>
           </button>
-        </div>
-
-        {/* Trust line */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-3.5 border-t border-border-hairline text-on-surface-variant font-label-sm text-label-sm">
-          {[
-            "Fixed all-inclusive fare",
-            "60-min terminal wait included",
-            "Automated flight radar tracking",
-          ].map((text) => (
-            <span key={text} className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[#d49b0e] text-[16px]">
-                check_circle
-              </span>
-              {text}
-            </span>
+        </form>
+      ) : (
+        <div className="space-y-2">
+          {counters.map((c) => (
+            <div key={c.key} className="flex items-center justify-between py-4 border-b border-neutral-200">
+              <div className="flex items-center gap-3.5">
+                <span className="material-symbols-outlined text-[22px] text-neutral-500">{c.icon}</span>
+                <div>
+                  <div className="font-body-md text-body-md font-semibold text-[#0a0a0a]">{c.label}</div>
+                  <div className="font-label-sm text-label-sm text-neutral-500">{c.hint}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  aria-label={`Fewer ${c.label}`}
+                  disabled={counts[c.key] <= c.min}
+                  onClick={() => adjust(c.key, -1, c.min, c.max)}
+                  className="w-11 h-11 rounded-full border border-neutral-300 text-xl hover:border-[#0a0a0a] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  −
+                </button>
+                <span className="w-6 text-center text-lg font-semibold tabular-nums">{counts[c.key]}</span>
+                <button
+                  type="button"
+                  aria-label={`More ${c.label}`}
+                  disabled={counts[c.key] >= c.max}
+                  onClick={() => adjust(c.key, 1, c.min, c.max)}
+                  className="w-11 h-11 rounded-full border border-neutral-300 text-xl hover:border-[#0a0a0a] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
           ))}
+
+          <div className="flex items-center gap-4 pt-6">
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="h-14 px-2 text-neutral-500 hover:text-[#0a0a0a] underline underline-offset-4 transition-colors"
+            >
+              ← Back
+            </button>
+            <button
+              type="button"
+              onClick={() => setModalOpen(true)}
+              className="group flex-1 h-14 bg-[#0a0a0a] hover:bg-[#1f1f1f] text-white rounded-xl font-headline-sm text-headline-sm flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
+            >
+              Find Available Vehicles
+              <span className="material-symbols-outlined text-[20px] text-[#e5a910] transition-transform group-hover:translate-x-1">
+                arrow_forward
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {modalOpen && (
+        <ConfirmationModal trip={trip} counts={counts} onClose={closeModal} />
+      )}
     </div>
   );
 }
