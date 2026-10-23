@@ -30,12 +30,12 @@ export default function Header() {
             Airport Transfers
             <span className="absolute -bottom-[2px] left-0 right-0 h-[2px] bg-[#e5a910]"></span>
           </Link>
-          <Link
+         {/*  <Link
             className="text-[#555558] font-label-lg text-label-lg transition-colors hover:text-[#0a0a0a] hover:border-b-2 hover:border-[#0a0a0a] pb-1 transition-all duration-150 ease-in-out cursor-pointer"
             href="#city-rides"
           >
             City Rides
-          </Link>
+          </Link> */}
           <Link
             className="text-[#555558] font-label-lg text-label-lg transition-colors hover:text-[#0a0a0a] hover:border-b-2 hover:border-[#0a0a0a] pb-1 transition-all duration-150 ease-in-out cursor-pointer"
             href="#fleet"
@@ -48,28 +48,28 @@ export default function Header() {
           >
             How It Works
           </Link>
-          <Link
+         {/*  <Link
             className="text-[#555558] font-label-lg text-label-lg transition-colors hover:text-[#0a0a0a] hover:border-b-2 hover:border-[#0a0a0a] pb-1 transition-all duration-150 ease-in-out cursor-pointer"
             href="#corporate"
           >
             Corporate
-          </Link>
+          </Link> */}
         </nav>
         <div className="flex items-center space-x-4">
-          <button
+          {/* <button
             className="hidden lg:flex items-center justify-center w-10 h-10 rounded-lg border border-border-hairline text-[#555558] hover:text-[#0a0a0a] hover:bg-surface-cool-subtle transition-colors"
             title="24/7 Concierge Support"
           >
             <span className="material-symbols-outlined text-[20px]">
               support_agent
             </span>
-          </button>
-          <button className="hidden sm:inline-flex items-center text-[#0a0a0a] font-label-lg text-label-lg px-4 py-2 hover:bg-surface-cool-subtle rounded-lg transition-colors font-medium">
+          </button> */}
+        {/*   <button className="hidden sm:inline-flex items-center text-[#0a0a0a] font-label-lg text-label-lg px-4 py-2 hover:bg-surface-cool-subtle rounded-lg transition-colors font-medium">
             My Bookings
-          </button>
-          <button className="bg-[#0a0a0a] text-white hover:bg-[#1f1f1f] font-label-lg text-label-lg px-5 py-2.5 rounded-lg font-semibold transition-all shadow-sm hover:shadow active:scale-[0.98]">
+          </button> */}
+       {/*    <button className="bg-[#0a0a0a] text-white hover:bg-[#1f1f1f] font-label-lg text-label-lg px-5 py-2.5 rounded-lg font-semibold transition-all shadow-sm hover:shadow active:scale-[0.98]">
             Sign In
-          </button>
+          </button> */}
         </div>
       </div>
     </header>
