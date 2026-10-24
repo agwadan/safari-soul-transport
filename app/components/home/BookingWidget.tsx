@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import ConfirmationModal from "./ConfirmationModal";
 import Icon, { type IconName } from "../ui/Icons";
+import LocationAutocomplete from "../LocationAutoComplete";
 import {
   Counts,
   DEFAULT_COUNTS,
@@ -65,7 +66,6 @@ const label =
 const iconPos =
   "pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2";
 
-
 const pad = (n: number) => String(n).padStart(2, "0");
 const todayLocal = () => {
   const d = new Date();
@@ -82,7 +82,10 @@ export default function BookingWidget() {
   const [counts, setCounts] = useState<Counts>(DEFAULT_COUNTS);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [modalOpen, setModalOpen] = useState(false);
-  const closeModal = useCallback(() => { setModalOpen(false); setStep(1); }, []);
+  const closeModal = useCallback(() => {
+    setModalOpen(false);
+    setStep(1);
+  }, []);
 
   const isReturn = trip.tripType === "return";
 
@@ -214,40 +217,32 @@ export default function BookingWidget() {
               <label htmlFor="pickup" className={label}>
                 Pickup Location
               </label>
-              <div className="relative">
-                <Icon
-                  name="my_location"
-                  size={20}
-                  className={`${iconPos} text-neutral-500`}
-                />
-                <input
-                  id="pickup"
-                  className={`${field} pl-11 pr-3`}
-                  placeholder="Airport, hotel, or address"
-                  value={trip.pickup}
-                  onChange={set("pickup")}
-                />
-              </div>
+              <LocationAutocomplete
+                id="pickup"
+                value={trip.pickup}
+                onChange={(value) => setTrip((t) => ({ ...t, pickup: value }))}
+                icon="my_location"
+                iconClassName="text-neutral-500"
+                inputClassName={`${field} pl-11 pr-3`}
+                placeholder="Airport, hotel, or address"
+              />
               {err("pickup")}
             </div>
             <div>
               <label htmlFor="destination" className={label}>
                 Drop-off Location
               </label>
-              <div className="relative">
-                <Icon
-                  name="location_on"
-                  size={20}
-                  className={`${iconPos} text-[#ba1a1a]`}
-                />
-                <input
-                  id="destination"
-                  className={`${field} pl-11 pr-3`}
-                  placeholder="Airport, hotel, or address"
-                  value={trip.destination}
-                  onChange={set("destination")}
-                />
-              </div>
+              <LocationAutocomplete
+                id="destination"
+                value={trip.destination}
+                onChange={(value) =>
+                  setTrip((t) => ({ ...t, destination: value }))
+                }
+                icon="location_on"
+                iconClassName="text-[#ba1a1a]"
+                inputClassName={`${field} pl-11 pr-3`}
+                placeholder="Airport, hotel, or address"
+              />
               {err("destination")}
             </div>
           </div>
@@ -378,7 +373,9 @@ export default function BookingWidget() {
             className="group w-full h-12 bg-[#0a0a0a] hover:bg-[#1f1f1f] text-white rounded-xl font-headline-sm text-headline-sm flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
           >
             <span className="sm:hidden">Continue</span>
-            <span className="hidden sm:inline">Continue to Passengers &amp; Luggage</span>
+            <span className="hidden sm:inline">
+              Continue to Passengers &amp; Luggage
+            </span>
             <Icon
               name="arrow_forward"
               size={20}
