@@ -28,7 +28,7 @@ export type Contact = {
 
 export const DEFAULT_TRIP: TripDetails = {
   tripType: "one-way",
-  pickup: "JKIA, Nairobi (NBO)",
+  pickup: "",
   destination: "",
   date: "",
   time: "",

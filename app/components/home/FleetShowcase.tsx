@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { fleet, formatKes } from "../data/fleet";
+import Icon, { type IconName } from "../ui/Icons";
 
 export default function FleetShowcase() {
   return (
@@ -72,18 +73,14 @@ export default function FleetShowcase() {
                   <div className="flex items-center gap-5 mb-5 text-on-surface-variant font-label-md text-label-md">
                     {car.maxPassengers && (
                       <span className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-xl">
-                          person
-                        </span>
-                        {car.maxPassengers}
+                        <Icon name="person" size={20} />
+                        {car.maxPassengers} People
                       </span>
                     )}
 
                     {bags && (
                       <span className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-xl">
-                          luggage
-                        </span>
+                        <Icon name="luggage" size={20} />
                         {bags.text}
                       </span>
                     )}
