@@ -23,12 +23,12 @@ export default function Hero() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-margin">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 lg:items-center">
           {/* Booking widget: first on mobile, right column on desktop */}
-          <div className="order-1 lg:order-2 lg:col-span-7">
+          <div className="order-2 lg:col-span-7">
             <BookingWidget />
           </div>
 
           {/* Copy: below the widget on mobile, left column on desktop */}
-          <div className="order-2 lg:order-1 lg:col-span-5">
+          <div className="order-1 lg:col-span-5">
             <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 mb-5 lg:mb-6">
               <span className="w-2 h-2 rounded-full bg-[#e5a910] animate-pulse" />
               <span className="font-label-sm text-label-sm text-white font-bold tracking-wide">

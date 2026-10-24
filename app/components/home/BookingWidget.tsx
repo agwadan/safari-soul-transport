@@ -56,12 +56,15 @@ const tripTypes: { value: TripType; label: string }[] = [
 type TextField = Exclude<keyof TripDetails, "tripType">;
 
 const field =
-  "w-full h-12 bg-neutral-100 border border-transparent rounded-xl font-body-md text-body-md text-[#0a0a0a] placeholder:text-neutral-400 focus:bg-white focus:border-[#0a0a0a] focus:ring-2 focus:ring-[#e5a910]/30 outline-none transition-all";
+  "w-full h-11 sm:h-12 bg-neutral-100 border border-transparent rounded-xl font-body-md text-body-md text-[#0a0a0a] placeholder:text-neutral-400 focus:bg-white focus:border-[#0a0a0a] focus:ring-2 focus:ring-[#e5a910]/30 outline-none transition-all";
+// Same as field but hides the native browser calendar/clock picker icon
+const dateField = `${field} [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer`;
 const label =
   "block font-label-sm text-label-sm font-semibold text-[#0a0a0a] mb-1.5";
 // position of the icon inside an input
 const iconPos =
   "pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2";
+
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const todayLocal = () => {
@@ -138,19 +141,14 @@ export default function BookingWidget() {
 
   return (
     <div className="bg-white rounded-3xl custom-shadow-lvl3 p-5 sm:p-6 lg:p-8">
-      {/* Title + step indicator in one compact header */}
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 shrink-0 rounded-xl bg-[#0a0a0a] text-[#e5a910] flex items-center justify-center">
-            <Icon name="directions_car" size={22} />
-          </div>
-          <h2 className="font-headline-sm text-headline-sm font-bold text-[#0a0a0a] truncate">
-            Book Your Transfer
-          </h2>
+      {/* Title + step indicator */}
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-[#0a0a0a] text-[#e5a910] flex items-center justify-center">
+          <Icon name="directions_car" size={20} />
         </div>
-        <span className="shrink-0 font-label-sm text-label-sm text-neutral-500">
-          Step {step} of 2
-        </span>
+        <h2 className="font-headline-sm text-headline-sm font-bold text-[#0a0a0a]">
+          Book Your Transfer
+        </h2>
       </div>
 
       <ol
@@ -165,11 +163,18 @@ export default function BookingWidget() {
               <div
                 className={`h-1.5 rounded-full transition-colors duration-300 ${reached ? "bg-[#e5a910]" : "bg-neutral-200"}`}
               />
-              <span
-                className={`mt-1.5 block font-label-sm text-label-sm ${step === n ? "font-semibold text-[#0a0a0a]" : "text-neutral-400"}`}
-              >
-                {n}. {name}
-              </span>
+              <div className="mt-1.5 flex items-center justify-between">
+                <span
+                  className={`block font-label-sm text-label-sm ${step === n ? "font-semibold text-[#0a0a0a]" : "text-neutral-400"}`}
+                >
+                  {n}. {name}
+                </span>
+                {step === n && (
+                  <span className="font-label-sm text-label-sm text-neutral-500">
+                    Step {n} of 2
+                  </span>
+                )}
+              </div>
             </li>
           );
         })}
@@ -204,7 +209,7 @@ export default function BookingWidget() {
             })}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="pickup" className={label}>
                 Pickup Location
@@ -261,7 +266,7 @@ export default function BookingWidget() {
                 <input
                   id="date"
                   type="date"
-                  className={`${field} pl-11 pr-3`}
+                  className={`${dateField} pl-11 pr-3`}
                   value={trip.date}
                   onChange={set("date")}
                 />
@@ -281,7 +286,7 @@ export default function BookingWidget() {
                 <input
                   id="time"
                   type="time"
-                  className={`${field} pl-11 pr-3`}
+                  className={`${dateField} pl-11 pr-3`}
                   value={trip.time}
                   onChange={set("time")}
                 />
@@ -306,7 +311,7 @@ export default function BookingWidget() {
                     id="returnDate"
                     type="date"
                     min={trip.date || undefined}
-                    className={`${field} pl-11 pr-3`}
+                    className={`${dateField} pl-11 pr-3`}
                     value={trip.returnDate}
                     onChange={set("returnDate")}
                   />
@@ -326,7 +331,7 @@ export default function BookingWidget() {
                   <input
                     id="returnTime"
                     type="time"
-                    className={`${field} pl-11 pr-3`}
+                    className={`${dateField} pl-11 pr-3`}
                     value={trip.returnTime}
                     onChange={set("returnTime")}
                   />
@@ -372,7 +377,8 @@ export default function BookingWidget() {
             type="submit"
             className="group w-full h-12 bg-[#0a0a0a] hover:bg-[#1f1f1f] text-white rounded-xl font-headline-sm text-headline-sm flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
           >
-            Continue to Passengers &amp; Luggage
+            <span className="sm:hidden">Continue</span>
+            <span className="hidden sm:inline">Continue to Passengers &amp; Luggage</span>
             <Icon
               name="arrow_forward"
               size={20}
@@ -442,7 +448,8 @@ export default function BookingWidget() {
               onClick={() => setModalOpen(true)}
               className="group flex-1 h-12 bg-[#0a0a0a] hover:bg-[#1f1f1f] text-white rounded-xl font-headline-sm text-headline-sm flex items-center justify-center gap-3 transition-all active:scale-[0.99]"
             >
-              Find Available Vehicles
+              <span className="sm:hidden">Find Vehicles</span>
+              <span className="hidden sm:inline">Find Available Vehicles</span>
               <Icon
                 name="arrow_forward"
                 size={20}
