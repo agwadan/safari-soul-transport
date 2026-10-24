@@ -1,11 +1,18 @@
 import BookingWidget from "./BookingWidget";
 
-const points = ["Zero surge pricing", "Flight radar telemetry", "60-min grace period"];
+const points = [
+  "Zero surge pricing",
+  "Flight radar telemetry",
+  "60-min grace period",
+];
 
 export default function Hero() {
   return (
     // Spacing steps down on short laptop screens (under 900px tall) and opens up on tall monitors
-    <section className="relative bg-[#0a0a0a] py-8 sm:py-10 lg:py-12 lg:[@media(min-height:900px)]:py-20 overflow-hidden">
+    <section
+      className="relative bg-[#0a0a0a] py-8 sm:py-10 lg:py-12 lg:[@media(min-height:900px)]:py-20 overflow-hidden"
+      id="hero"
+    >
       {/* Soft amber glow, no photo */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-40 -left-40 w-[480px] h-[480px] rounded-full bg-[#e5a910]/10 blur-3xl" />
@@ -43,7 +50,10 @@ export default function Hero() {
 
             <ul className="flex flex-wrap gap-x-6 gap-y-2.5 lg:pb-6 lg:border-b lg:border-white/15">
               {points.map((p) => (
-                <li key={p} className="flex items-center gap-2 font-label-md text-label-md text-white">
+                <li
+                  key={p}
+                  className="flex items-center gap-2 font-label-md text-label-md text-white"
+                >
                   <span
                     className="material-symbols-outlined text-[20px] text-[#e5a910]"
                     style={{ fontVariationSettings: "'FILL' 1" }}

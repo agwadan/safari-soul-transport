@@ -79,7 +79,7 @@ export default function BookingWidget() {
   const [counts, setCounts] = useState<Counts>(DEFAULT_COUNTS);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [modalOpen, setModalOpen] = useState(false);
-  const closeModal = useCallback(() => setModalOpen(false), []);
+  const closeModal = useCallback(() => { setModalOpen(false); setStep(1); }, []);
 
   const isReturn = trip.tripType === "return";
 
