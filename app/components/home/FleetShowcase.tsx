@@ -22,20 +22,14 @@ export default function FleetShowcase() {
 
           <div className="flex items-center gap-3 mt-4 md:mt-0 font-label-md text-label-md">
             <span className="px-3 py-1 rounded-full bg-white border border-border-hairline text-on-surface-variant font-medium">
-              All vehicles under 3 years old
-            </span>
-            <span className="px-3 py-1 rounded-full bg-white border border-border-hairline text-on-surface-variant font-medium">
-              Complimentary high-speed Wi-Fi &amp; Evian
+              Complimentary high-speed Wi-Fi 
             </span>
           </div>
         </div>
 
         {/* Fleet Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex flex-wrap justify-center gap-6">
           {fleet.map((car) => {
-            const passengers = car.specs.find((spec) =>
-              /passenger|person|seat/i.test(spec.text),
-            );
             const bags = car.specs.find((spec) =>
               /bag|luggage/i.test(spec.text),
             );
@@ -43,7 +37,7 @@ export default function FleetShowcase() {
             return (
               <div
                 key={car.id}
-                className={`relative bg-white rounded-xl p-5 flex flex-col justify-between transition-all hover:-translate-y-1 ${
+                className={`relative w-full max-w-sm bg-white rounded-xl p-5 flex flex-col justify-between items-center transition-all hover:-translate-y-1 ${
                   car.isPopular
                     ? "border-2 border-[#e5a910] shadow-lg shadow-[#e5a910]/10"
                     : "border border-border-hairline custom-shadow-lvl1 hover:border-black hover:shadow-md"
