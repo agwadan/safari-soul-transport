@@ -95,17 +95,17 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link className="hover:text-[#e5a910] transition-colors" href="terms-of-service">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link className="hover:text-[#e5a910] transition-colors" href="privacy-policy">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link className="hover:text-[#e5a910] transition-colors" href="#">
+                <Link className="hover:text-[#e5a910] transition-colors" href="">
                   Safety Standards
                 </Link>
               </li>
@@ -122,11 +122,11 @@ export default function Footer() {
         <div className="pt-8 border-t border-neutral-900 flex flex-col md:flex-row items-center justify-between gap-4 font-body-sm text-body-sm text-neutral-400">
           <div>© 2026 Agara Ventures Ltd. All rights reserved.</div>
           <div className="flex items-center space-x-6 font-label-sm text-label-sm">
-            <Link className="hover:text-white transition-colors" href="#">
+            <Link className="hover:text-white transition-colors" href="/terms-of-service">
               Terms of Service
             </Link>
             <span>•</span>
-            <Link className="hover:text-white transition-colors" href="#">
+            <Link className="hover:text-white transition-colors" href="/privacy-policy">
               Privacy Policy
             </Link>
             <span>•</span>

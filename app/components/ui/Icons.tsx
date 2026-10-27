@@ -39,6 +39,7 @@ import {
   Wifi,
   X,
   type LucideIcon,
+  Flame,
 } from "lucide-react";
 
 // Maps the Material Symbols names used across the site to Lucide icons.
@@ -84,12 +85,12 @@ const icons = {
   wifi: Wifi,
   work: Briefcase,
   badge: BadgeCheck,
+  flame: Flame,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof icons;
 
 type IconProps = {
-  // IconName gives autocomplete; plain strings are allowed for data-driven icons (e.g. from a CMS)
   name: IconName | (string & {});
   size?: number;
   strokeWidth?: number;

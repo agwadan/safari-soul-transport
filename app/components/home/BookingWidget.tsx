@@ -172,11 +172,11 @@ export default function BookingWidget() {
                 >
                   {n}. {name}
                 </span>
-                {step === n && (
+               {/*  {step === n && (
                   <span className="font-label-sm text-label-sm text-neutral-500">
                     Step {n} of 2
                   </span>
-                )}
+                )} */}
               </div>
             </li>
           );

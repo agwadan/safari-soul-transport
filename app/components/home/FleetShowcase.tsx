@@ -37,7 +37,7 @@ export default function FleetShowcase() {
             return (
               <div
                 key={car.id}
-                className={`relative w-full max-w-sm bg-white rounded-xl p-5 flex flex-col justify-between items-center transition-all hover:-translate-y-1 ${
+                className={`relative w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] max-w-sm bg-white rounded-xl p-5 flex flex-col justify-between items-center transition-all hover:-translate-y-1 ${
                   car.isPopular
                     ? "border-2 border-[#e5a910] shadow-lg shadow-[#e5a910]/10"
                     : "border border-border-hairline custom-shadow-lvl1 hover:border-black hover:shadow-md"
@@ -46,7 +46,7 @@ export default function FleetShowcase() {
                 {car.isPopular && (
                   <div className="absolute -top-3 right-5 z-10 bg-[#e5a910] text-[#0a0a0a] font-label-sm text-label-sm font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1">
                     <span className="material-symbols-outlined text-[14px]">
-                      local_fire_department
+                     <Icon name="flame" size={20} />
                     </span>
                     MOST POPULAR
                   </div>
