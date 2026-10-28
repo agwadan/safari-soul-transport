@@ -2,6 +2,7 @@ import Image from "next/image";
 import { convertKesToUsd, fleet, formatKes, formatUsd } from "../data/fleet";
 import Icon from "../ui/Icons";
 
+
 export default function FleetShowcase({
   kesToUsd,
 }: {
@@ -9,30 +10,32 @@ export default function FleetShowcase({
 }) {
   return (
     <section
-      className="py-16 bg-background border-b border-border-hairline"
+      className="border-b border-border-hairline bg-background py-12 sm:py-16 lg:py-20"
       id="fleet"
     >
-      <div className="max-w-7xl mx-auto px-margin">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-margin">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+        <div className="mb-8 flex flex-col gap-4 sm:mb-10 md:flex-row md:items-end md:justify-between lg:mb-12">
           <div>
-            <span className="font-label-sm text-label-sm font-bold tracking-wider text-[#b27c00] uppercase mb-2 block">
+            <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-[#b27c00] sm:text-sm">
               Pristine Executive Vehicles
             </span>
-            <h2 className="font-headline-lg text-headline-lg font-bold text-[#0a0a0a]">
+
+            <h2 className="text-2xl font-bold leading-tight text-[#0a0a0a] sm:text-3xl lg:text-headline-lg">
               Curated Chauffeur Fleet
             </h2>
           </div>
 
-          <div className="flex items-center gap-3 mt-4 md:mt-0 font-label-md text-label-md">
-            <span className="px-3 py-1 rounded-full bg-white border border-border-hairline text-on-surface-variant font-medium">
-              Complimentary high-speed Wi-Fi 
+          <div>
+            <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-border-hairline bg-white px-3 py-2 text-xs font-medium text-on-surface-variant sm:text-sm">
+              <Icon name="wifi" size={16} />
+              Complimentary high-speed Wi-Fi
             </span>
           </div>
         </div>
 
         {/* Fleet Cards */}
-        <div className="flex flex-wrap justify-center gap-6">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
           {fleet.map((car) => {
             const bags = car.specs.find((spec) =>
               /bag|luggage/i.test(spec.text),
@@ -41,68 +44,76 @@ export default function FleetShowcase({
             return (
               <div
                 key={car.id}
-                className={`relative w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] max-w-sm bg-white rounded-xl p-5 flex flex-col justify-between items-center transition-all hover:-translate-y-1 ${
+                className={`relative flex min-w-0 flex-col overflow-visible rounded-xl bg-white transition-all duration-200 hover:-translate-y-1 ${
                   car.isPopular
-                    ? "border-2 border-[#e5a910] shadow-lg shadow-[#e5a910]/10"
+                    ? "border-2 border-[#e5a910] shadow-md shadow-[#e5a910]/10"
                     : "border border-border-hairline custom-shadow-lvl1 hover:border-black hover:shadow-md"
                 }`}
               >
+                {/* Popular Badge */}
                 {car.isPopular && (
-                  <div className="absolute -top-3 right-5 z-10 bg-[#e5a910] text-[#0a0a0a] font-label-sm text-label-sm font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">
-                     <Icon name="flame" size={20} />
-                    </span>
+                  <div className="absolute -top-3 right-3 z-10 inline-flex max-w-[calc(100%-1.5rem)] items-center gap-1 rounded-full bg-[#e5a910] px-3 py-1 text-[10px] font-bold tracking-wide text-[#0a0a0a] shadow-sm sm:right-4 sm:text-xs">
+                    <Icon name="flame" size={14} />
                     MOST POPULAR
                   </div>
                 )}
+
                 {/* Vehicle Image */}
-                <div className="h-48 w-full relative bg-surface-container-low">
+                <div className="relative aspect-[16/10] w-full overflow-hidden rounded-t-[10px] bg-surface-container-low">
                   <Image
                     src={car.image}
                     alt={car.name}
                     fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover"
+                    sizes="(max-width: 639px) calc(100vw - 34px), (max-width: 1023px) calc(50vw - 30px), (max-width: 1279px) calc(33.333vw - 24px), 400px"
+                    className="object-cover transition-transform duration-300 hover:scale-[1.02]"
                   />
                 </div>
 
-                <div className="p-5 flex flex-col flex-1">
+                {/* Vehicle Details */}
+                <div className="flex flex-1 flex-col p-4 sm:p-5">
+                  {/* Vehicle Name */}
+                  <h3 className="mb-3 text-lg font-semibold leading-snug text-[#0a0a0a] sm:text-xl">
+                    {car.name}
+                  </h3>
+
                   {/* Passenger and Luggage Capacity */}
-                  <div className="flex items-center gap-5 mb-5 text-on-surface-variant font-label-md text-label-md">
+                  <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-on-surface-variant sm:gap-x-5 sm:text-sm">
                     {car.maxPassengers && (
-                      <span className="flex items-center gap-2">
-                        <Icon name="person" size={20} />
+                      <span className="inline-flex items-center gap-1.5">
+                        <Icon name="person" size={18} />
                         {car.maxPassengers} People
                       </span>
                     )}
 
                     {bags && (
-                      <span className="flex items-center gap-2">
-                        <Icon name="luggage" size={20} />
+                      <span className="inline-flex items-center gap-1.5">
+                        <Icon name="luggage" size={18} />
                         {bags.text}
                       </span>
                     )}
                   </div>
 
-                  {/* Starting Price and Selection */}
-                  <div className="mt-auto pt-4 border-t border-border-hairline flex items-center justify-between gap-3">
-                    <div>
-                      <span className="font-body-sm text-body-sm text-on-surface-variant block">
+                  {/* Price and Selection */}
+                  <div className="mt-auto flex items-center justify-between gap-3 border-t border-border-hairline pt-4">
+                    <div className="min-w-0 flex-1">
+                      <span className="mb-1 block text-xs text-on-surface-variant sm:text-sm">
                         Starting from
                       </span>
-                      <span className="flex items-baseline gap-2 flex-wrap">
-                        <span className="font-headline-md text-headline-md font-bold text-[#0a0a0a]">
+
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                        <span className="text-lg font-bold leading-tight text-[#0a0a0a] sm:text-xl">
                           {formatKes(car.priceKes)}
                         </span>
-                        <span className="font-body-sm text-body-sm text-on-surface-variant">
+
+                        <span className="text-xs text-on-surface-variant sm:text-sm">
                           / {formatUsd(convertKesToUsd(car.priceKes, kesToUsd, car.priceUsd))}
                         </span>
-                      </span>
+                      </div>
                     </div>
 
                     <button
                       type="button"
-                      className="px-4 py-2.5 bg-[#0a0a0a] hover:bg-[#222222] text-white font-label-md text-label-md font-semibold rounded-lg transition-colors"
+                      className="shrink-0 rounded-lg bg-[#0a0a0a] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#222222] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b27c00] sm:px-5"
                     >
                       Select
                     </button>
@@ -112,7 +123,9 @@ export default function FleetShowcase({
             );
           })}
         </div>
-        <p className="mt-6 text-center font-body-sm text-body-sm text-on-surface-variant">
+
+        {/* Currency Disclaimer */}
+        <p className="mt-5 text-center text-xs leading-5 text-on-surface-variant sm:mt-6 sm:text-sm">
           USD amounts are approximate, converted from KES using{" "}
           <a
             href="https://www.exchangerate-api.com"

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Icon from "../ui/Icons";
 
 const services = [
   {
@@ -34,49 +35,59 @@ const services = [
 export default function MobilityServices() {
   return (
     <section
-      className="py-16 bg-white border-b border-border-hairline"
       id="services"
+      className="border-b border-border-hairline bg-white py-12 sm:py-16 lg:py-20"
     >
-      <div className="max-w-7xl mx-auto px-margin">
-        <div className="mb-10 text-center max-w-2xl mx-auto">
-          <span className="font-label-sm text-label-sm font-bold tracking-wider text-[#b27c00] uppercase mb-2 block">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-margin">
+        {/* Section heading */}
+        <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-10 lg:mb-12">
+          <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-[#b27c00] sm:text-sm">
             Comprehensive Executive Mobility
           </span>
-          <h2 className="font-headline-lg text-headline-lg font-bold text-[#0a0a0a] mb-3">
+
+          <h2 className="mb-3 text-2xl font-bold leading-tight text-[#0a0a0a] sm:text-3xl lg:text-headline-lg">
             Tailored Mobility Services
           </h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            Beyond airport connections: dedicated chauffeur solutions designed
-            for executive schedules and discerning corporate itineraries.
+
+          <p className="text-sm leading-6 text-on-surface-variant sm:text-base sm:leading-7">
+            Beyond airport connections: dedicated chauffeur solutions
+            designed for executive schedules and discerning corporate
+            itineraries.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Responsive service cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4 lg:gap-6">
           {services.map((svc) => (
             <div
               key={svc.title}
-              className="p-6 rounded-xl bg-surface border border-border-hairline hover:border-black transition-all flex flex-col justify-between"
+              className="group flex min-w-0 flex-col justify-between rounded-xl border border-border-hairline bg-white p-4 transition-colors duration-200 hover:border-[#b27c00] sm:p-5 lg:p-6"
             >
               <div>
-                <div className="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-[#0a0a0a] mb-4">
-                  <span className="material-symbols-outlined text-[22px]">
-                    {svc.icon}
-                  </span>
+                {/* Icon */}
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-[#f8f8fa] text-[#0a0a0a] sm:mb-4">
+                  <Icon name={svc.icon} />
                 </div>
-                <h3 className="font-headline-sm text-headline-sm font-semibold text-[#0a0a0a] mb-1">
+
+                {/* Content */}
+                <h3 className="mb-2 text-base font-semibold leading-snug text-[#0a0a0a] sm:text-lg">
                   {svc.title}
                 </h3>
-                <p className="font-body-sm text-body-sm text-on-surface-variant mb-4">
+
+                <p className="mb-5 text-sm leading-6 text-on-surface-variant">
                   {svc.desc}
                 </p>
               </div>
-              <div className="flex items-center justify-between pt-3 border-t border-border-hairline">
-                <span className="font-label-md text-label-md font-bold text-[#0a0a0a]">
+
+              {/* Footer */}
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-hairline pt-4">
+                <span className="text-sm font-bold text-[#0a0a0a]">
                   {svc.price}
                 </span>
+
                 <Link
-                  className="text-[#b27c00] hover:text-[#d49b0e] font-label-sm text-label-sm font-semibold hover:underline"
                   href="#"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-[#b27c00] transition-colors hover:text-[#d49b0e] hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b27c00]"
                 >
                   {svc.cta}
                 </Link>
