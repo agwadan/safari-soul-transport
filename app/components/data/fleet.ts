@@ -19,7 +19,7 @@ export const fleet: Vehicle[] = [
     name: "Mazda 3 Sedan",
     model: "Mazda 3 Sedan",
     image:
-      "/images/fleet/mazda-3.jpg",
+      "/images/fleet/axela.png",
     specs: [
       { icon: "person", text: "3 Pax" },
       { icon: "luggage", text: "2 Bags" },
@@ -29,6 +29,24 @@ export const fleet: Vehicle[] = [
     maxSuitcases: 2,
     priceKes: 3500,
     priceUsd: 25,
+    isPopular: false,
+  },
+  {
+    id: "vw-arteon",
+    tier: "Luxury",
+    name: "Volkswagen Arteon",
+    model: "Volkswagen Arteon",
+    image:
+      "/images/fleet/arteon.jpg",
+    specs: [
+      { icon: "person", text: "2 Pax" },
+      { icon: "luggage", text: "2 Bags" },
+      { icon: "wifi", text: "Free" },
+    ],
+    maxPassengers: 5,
+    maxSuitcases: 2,
+    priceKes: 10000,
+    priceUsd: 75,
     isPopular: false,
   },
   {
@@ -55,7 +73,7 @@ export const fleet: Vehicle[] = [
     name: "Coaster Bus",
     model: "Toyota Coaster Executive",
     image:
-      "/images/fleet/toyota-coaster-overview.jpg",
+      "/images/fleet/coaster_2.png",
     specs: [
       { icon: "groups", text: "22-28 Pax" },
       { icon: "luggage", text: "Large Capacity" },
@@ -70,3 +88,16 @@ export const fleet: Vehicle[] = [
 ];
 
 export const formatKes = (n: number) => `KES ${n.toLocaleString("en-US")}`;
+export const formatUsd = (n: number) => `$${n.toLocaleString("en-US")}`;
+
+export function convertKesToUsd(
+  amountKes: number,
+  rate: number | null,
+  fallbackUsd: number,
+) {
+  if (rate && Number.isFinite(rate) && rate > 0) {
+    return Math.round(amountKes * rate);
+  }
+
+  return fallbackUsd;
+}

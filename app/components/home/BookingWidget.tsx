@@ -76,7 +76,11 @@ const nowLocalTime = () => {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
-export default function BookingWidget() {
+export default function BookingWidget({
+  kesToUsd,
+}: {
+  kesToUsd: number | null;
+}) {
   const [step, setStep] = useState<1 | 2>(1);
   const [trip, setTrip] = useState<TripDetails>(DEFAULT_TRIP);
   const [counts, setCounts] = useState<Counts>(DEFAULT_COUNTS);
@@ -458,7 +462,12 @@ export default function BookingWidget() {
       )}
 
       {modalOpen && (
-        <ConfirmationModal trip={trip} counts={counts} onClose={closeModal} />
+        <ConfirmationModal
+          trip={trip}
+          counts={counts}
+          kesToUsd={kesToUsd}
+          onClose={closeModal}
+        />
       )}
     </div>
   );

@@ -8,7 +8,7 @@ export default function Header() {
   return (
     <header className="w-full sticky top-0 z-50 bg-white border-b border-border-hairline shadow-sm">
       <div className="w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-margin max-w-7xl mx-auto h-14 sm:h-16 md:h-20">
-        <Link className="flex items-center gap-2 sm:gap-3 group" href="#">
+        <Link className="flex items-center gap-2 sm:gap-3 group" href="/">
           <div className="w-10 h-10 rounded-lg bg-[#0a0a0a] flex items-center justify-center text-white group-hover:bg-[#1a1a1a] transition-colors shadow-sm">
             <span>
               <Icon
@@ -31,32 +31,32 @@ export default function Header() {
         <nav className="hidden md:flex items-center space-x-8">
           <Link
             className="text-[#0a0a0a] font-label-lg text-label-lg border-b-2 border-[#0a0a0a] pb-1 transition-all duration-150 ease-in-out cursor-pointer relative"
-            href="#hero"
+            href="/#hero"
           >
             Airport Transfers
             <span className="absolute -bottom-[2px] left-0 right-0 h-[2px] bg-[#e5a910]"></span>
           </Link>
           {/*  <Link
             className="text-[#555558] font-label-lg text-label-lg transition-colors hover:text-[#0a0a0a] hover:border-b-2 hover:border-[#0a0a0a] pb-1 transition-all duration-150 ease-in-out cursor-pointer"
-            href="#city-rides"
+            href="/#city-rides"
           >
             City Rides
           </Link> */}
           <Link
             className="text-[#555558] font-label-lg text-label-lg transition-colors hover:text-[#0a0a0a] hover:border-b-2 hover:border-[#0a0a0a] pb-1 transition-all duration-150 ease-in-out cursor-pointer"
-            href="#fleet"
+            href="/#fleet"
           >
             Fleet
           </Link>
           <Link
             className="text-[#555558] font-label-lg text-label-lg transition-colors hover:text-[#0a0a0a] hover:border-b-2 hover:border-[#0a0a0a] pb-1 transition-all duration-150 ease-in-out cursor-pointer"
-            href="#how-it-works"
+            href="/#how-it-works"
           >
             How It Works
           </Link>
           {/*  <Link
             className="text-[#555558] font-label-lg text-label-lg transition-colors hover:text-[#0a0a0a] hover:border-b-2 hover:border-[#0a0a0a] pb-1 transition-all duration-150 ease-in-out cursor-pointer"
-            href="#corporate"
+            href="/#corporate"
           >
             Corporate
           </Link> */}
@@ -67,21 +67,21 @@ export default function Header() {
             <nav className="flex flex-col space-y-2 p-4">
               <Link
                 className="text-[#0a0a0a] font-label-lg text-label-lg py-2"
-                href="#hero"
+                href="/#hero"
                 onClick={() => setMenuOpen(false)}
               >
                 Airport Transfers
               </Link>
               <Link
                 className="text-[#555558] font-label-lg text-label-lg py-2"
-                href="#fleet"
+                href="/#fleet"
                 onClick={() => setMenuOpen(false)}
               >
                 Fleet
               </Link>
               <Link
                 className="text-[#555558] font-label-lg text-label-lg py-2"
-                href="#how-it-works"
+                href="/#how-it-works"
                 onClick={() => setMenuOpen(false)}
               >
                 How It Works

@@ -1,8 +1,12 @@
 import Image from "next/image";
-import { fleet, formatKes } from "../data/fleet";
-import Icon, { type IconName } from "../ui/Icons";
+import { convertKesToUsd, fleet, formatKes, formatUsd } from "../data/fleet";
+import Icon from "../ui/Icons";
 
-export default function FleetShowcase() {
+export default function FleetShowcase({
+  kesToUsd,
+}: {
+  kesToUsd: number | null;
+}) {
   return (
     <section
       className="py-16 bg-background border-b border-border-hairline"
@@ -86,8 +90,13 @@ export default function FleetShowcase() {
                       <span className="font-body-sm text-body-sm text-on-surface-variant block">
                         Starting from
                       </span>
-                      <span className="font-headline-md text-headline-md font-bold text-[#0a0a0a]">
-                        {formatKes(car.priceKes)}
+                      <span className="flex items-baseline gap-2 flex-wrap">
+                        <span className="font-headline-md text-headline-md font-bold text-[#0a0a0a]">
+                          {formatKes(car.priceKes)}
+                        </span>
+                        <span className="font-body-sm text-body-sm text-on-surface-variant">
+                          / {formatUsd(convertKesToUsd(car.priceKes, kesToUsd, car.priceUsd))}
+                        </span>
                       </span>
                     </div>
 
@@ -103,6 +112,18 @@ export default function FleetShowcase() {
             );
           })}
         </div>
+        <p className="mt-6 text-center font-body-sm text-body-sm text-on-surface-variant">
+          USD amounts are approximate, converted from KES using{" "}
+          <a
+            href="https://www.exchangerate-api.com"
+            className="underline underline-offset-2 hover:text-[#0a0a0a]"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Exchange Rate API
+          </a>
+          .
+        </p>
       </div>
     </section>
   );

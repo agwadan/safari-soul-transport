@@ -7,16 +7,19 @@ import FleetShowcase from "@/components/home/FleetShowcase";
 import MobilityServices from "@/components/home/MobilityServices";
 import HowItWorks from "@/components/home/HowItWorks";
 import TrustCredentials from "@/components/home/TrustCredentials";
+import { getKesToUsdRate } from "@/app/lib/exchange-rate";
 
-export default function Page() {
+export default async function Page() {
+  const kesToUsd = await getKesToUsdRate();
+
   return (
     <>
       <TopBar />
       <Header />
       <main>
-        <Hero />
+        <Hero kesToUsd={kesToUsd} />
         <SafariSoulStandard />
-        <FleetShowcase />
+        <FleetShowcase kesToUsd={kesToUsd} />
         <MobilityServices />
         <HowItWorks />
         {/* <TrustCredentials /> */}

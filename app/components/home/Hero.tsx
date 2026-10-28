@@ -1,4 +1,5 @@
 import BookingWidget from "./BookingWidget";
+import Icon from "../ui/Icons";
 
 const points = [
   "Zero surge pricing",
@@ -6,7 +7,7 @@ const points = [
   "60-min grace period",
 ];
 
-export default function Hero() {
+export default function Hero({ kesToUsd }: { kesToUsd: number | null }) {
   return (
     // Spacing steps down on short laptop screens (under 900px tall) and opens up on tall monitors
     <section
@@ -24,7 +25,7 @@ export default function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 lg:items-center">
           {/* Booking widget: first on mobile, right column on desktop */}
           <div className="order-2 lg:col-span-7">
-            <BookingWidget />
+            <BookingWidget kesToUsd={kesToUsd} />
           </div>
 
           {/* Copy: below the widget on mobile, left column on desktop */}
@@ -54,12 +55,7 @@ export default function Hero() {
                   key={p}
                   className="flex items-center gap-2 font-label-md text-label-md text-white"
                 >
-                  <span
-                    className="material-symbols-outlined text-[20px] text-[#e5a910]"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
-                    check_circle
-                  </span>
+                  <Icon name="check_circle" size={20} className="text-[#e5a910]" />
                   {p}
                 </li>
               ))}

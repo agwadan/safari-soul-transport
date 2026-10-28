@@ -9,21 +9,28 @@ import {
   formatTime,
   plural,
 } from "../data/booking";
-import { fleet, formatKes } from "../data/fleet";
+import { convertKesToUsd, fleet, formatKes, formatUsd } from "../data/fleet";
 
 type Props = {
   trip: TripDetails;
   counts: Counts;
+  kesToUsd: number | null;
   onClose: () => void;
 };
 
 const input =
   "w-full h-12 bg-neutral-100 border border-transparent rounded-xl px-4 font-body-md text-body-md text-[#0a0a0a] placeholder:text-neutral-400 focus:bg-white focus:border-[#0a0a0a] focus:ring-2 focus:ring-[#e5a910]/30 outline-none transition-all";
 
-export default function ConfirmationModal({ trip, counts, onClose }: Props) {
+export default function ConfirmationModal({
+  trip,
+  counts,
+  kesToUsd,
+  onClose,
+}: Props) {
   const [vehicleId, setVehicleId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -52,12 +59,16 @@ export default function ConfirmationModal({ trip, counts, onClose }: Props) {
     const found: Record<string, string> = {};
     if (!selected) found.vehicle = "Please select a vehicle";
     if (!name.trim()) found.name = "Required";
+    if (!email.trim()) found.email = "Required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      found.email = "Enter a valid email address";
     if (!/^\+?[\d\s()-]{9,}$/.test(phone.trim()))
       found.phone = "Enter a valid phone number";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
+      found.email = "Enter a valid email address";
     setErrors(found);
     if (Object.keys(found).length) return;
-
-    // TODO: send { trip, counts, vehicle: selected.id, name, phone } to your backend
+    // TODO: send { trip, counts, vehicle: selected.id, name, phone, email } to your backend
     setDone(true);
   }
 
@@ -219,11 +230,10 @@ export default function ConfirmationModal({ trip, counts, onClose }: Props) {
                           role="radio"
                           aria-checked={on}
                           onClick={() => setVehicleId(v.id)}
-                          className={`w-full text-left flex items-center gap-4 p-3 rounded-2xl border-2 transition-all ${
-                            on
+                          className={`w-full text-left flex items-center gap-4 p-3 rounded-2xl border-2 transition-all ${on
                               ? "border-[#0a0a0a] bg-neutral-50"
                               : "border-neutral-200 hover:border-neutral-400"
-                          }`}
+                            }`}
                         >
                           <div className="relative w-24 h-20 sm:w-32 sm:h-24 shrink-0 rounded-xl overflow-hidden bg-neutral-100">
                             <Image
@@ -258,16 +268,17 @@ export default function ConfirmationModal({ trip, counts, onClose }: Props) {
                               {formatKes(v.priceKes)}
                             </div>
                             <div className="font-label-sm text-label-sm text-neutral-400">
-                              ${v.priceUsd}
+                              {formatUsd(
+                                convertKesToUsd(v.priceKes, kesToUsd, v.priceUsd),
+                              )}
                             </div>
                           </div>
                           <span
                             aria-hidden
-                            className={`w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center ${
-                              on
+                            className={`w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center ${on
                                 ? "border-[#0a0a0a] bg-[#0a0a0a]"
                                 : "border-neutral-300"
-                            }`}
+                              }`}
                           >
                             {on && (
                               <span className="w-2 h-2 rounded-full bg-[#e5a910]" />
@@ -333,6 +344,33 @@ export default function ConfirmationModal({ trip, counts, onClose }: Props) {
                       </p>
                     )}
                   </div>
+                  <div>
+                    <label
+                      htmlFor="c-email"
+                      className="block font-label-sm text-label-sm font-semibold mb-1.5"
+                    >
+                      Email address
+                    </label>
+
+                    <input
+                      id="c-email"
+                      type="email"
+                      className={input}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      autoComplete="email"
+                      aria-invalid={!!errors.email}
+                      required
+                    />
+
+                    {errors.email && (
+                      <p className="mt-1 text-xs text-[#ba1a1a]">
+                        {errors.email}
+                      </p>
+                    )}
+                  </div>
+
                 </div>
               </section>
             </div>
