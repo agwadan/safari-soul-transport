@@ -31,7 +31,9 @@ export default function ConfirmationModal({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("cash"); // Added payment state
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -55,7 +57,7 @@ export default function ConfirmationModal({
     };
   }, [onClose]);
 
-  function confirm() {
+  async function confirm() {
     const found: Record<string, string> = {};
     if (!selected) found.vehicle = "Please select a vehicle";
     if (!name.trim()) found.name = "Required";
@@ -64,17 +66,39 @@ export default function ConfirmationModal({
       found.email = "Enter a valid email address";
     if (!/^\+?[\d\s()-]{9,}$/.test(phone.trim()))
       found.phone = "Enter a valid phone number";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
-      found.email = "Enter a valid email address";
+    
     setErrors(found);
     if (Object.keys(found).length) return;
-    // TODO: send { trip, counts, vehicle: selected.id, name, phone, email } to your backend
-    setDone(true);
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trip,
+          counts,
+          vehicle: selected,
+          name,
+          phone,
+          email,
+          paymentMethod,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to submit booking");
+      setDone(true);
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong. Please try again or call dispatch.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const rows: { icon: string; label: string; value: string }[] = [
-    { icon: "local_airport", label: "Pickup", value: trip.pickup },
-    { icon: "location_on", label: "Destination", value: trip.destination },
+    { icon: "my_location", label: "Pickup", value: trip.pickup },
+    { icon: "location_on", label: "Drop-off", value: trip.destination },
     {
       icon: "calendar_today",
       label: "Date & time",
@@ -121,13 +145,12 @@ export default function ConfirmationModal({
               id="confirm-title"
               className="font-headline-md text-headline-md font-bold text-[#0a0a0a] mb-2"
             >
-              Booking request received
+              Booking request confirmed!
             </h2>
             <p className="font-body-md text-body-md text-neutral-600 mb-6">
-              {selected?.name} · {formatDate(trip.date)} at{" "}
-              {formatTime(trip.time)}.
+              A confirmation email has been dispatched to <strong>{email}</strong>.
               <br />
-              We&apos;ll confirm with you on {phone}.
+              We&apos;ll coordinate your {selected?.name} transfer via {phone}.
             </p>
             <button
               onClick={onClose}
@@ -203,7 +226,7 @@ export default function ConfirmationModal({
                     </p>
                     <p className="font-body-sm text-body-sm text-neutral-600 mb-3">
                       Our standard vehicles don&apos;t fit this party. Contact
-                      us for a custom minibus or multi-vehicle transfer.
+                      us for a custom bus transfer.
                     </p>
                     <a
                       href="tel:+254792485814"
@@ -230,10 +253,11 @@ export default function ConfirmationModal({
                           role="radio"
                           aria-checked={on}
                           onClick={() => setVehicleId(v.id)}
-                          className={`w-full text-left flex items-center gap-4 p-3 rounded-2xl border-2 transition-all ${on
+                          className={`w-full text-left flex items-center gap-4 p-3 rounded-2xl border-2 transition-all ${
+                            on
                               ? "border-[#0a0a0a] bg-neutral-50"
                               : "border-neutral-200 hover:border-neutral-400"
-                            }`}
+                          }`}
                         >
                           <div className="relative w-24 h-20 sm:w-32 sm:h-24 shrink-0 rounded-xl overflow-hidden bg-neutral-100">
                             <Image
@@ -275,10 +299,11 @@ export default function ConfirmationModal({
                           </div>
                           <span
                             aria-hidden
-                            className={`w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center ${on
+                            className={`w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center ${
+                              on
                                 ? "border-[#0a0a0a] bg-[#0a0a0a]"
                                 : "border-neutral-300"
-                              }`}
+                            }`}
                           >
                             {on && (
                               <span className="w-2 h-2 rounded-full bg-[#e5a910]" />
@@ -296,12 +321,52 @@ export default function ConfirmationModal({
                 )}
               </section>
 
+              {/* Payment Option Section */}
+              <section aria-label="Payment options">
+                <h3 className="font-label-lg text-label-lg font-bold text-[#0a0a0a] mb-3">
+                  Payment Option
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("cash")}
+                    className={`flex items-center gap-3 p-4 rounded-2xl border-2 text-left transition-all ${
+                      paymentMethod === "cash"
+                        ? "border-[#0a0a0a] bg-neutral-50"
+                        : "border-neutral-200 hover:border-neutral-400"
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[24px] text-[#e5a910]">
+                      payments
+                    </span>
+                    <div>
+                      <div className="font-body-md font-bold text-[#0a0a0a]">Cash to Driver</div>
+                      <div className="font-label-sm text-neutral-500">Pay cash/M-Pesa on arrival</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled
+                    className="flex items-center gap-3 p-4 rounded-2xl border-2 border-neutral-200 text-left opacity-50 cursor-not-allowed"
+                  >
+                    <span className="material-symbols-outlined text-[24px] text-neutral-400">
+                      credit_card
+                    </span>
+                    <div>
+                      <div className="font-body-md font-bold text-neutral-600">Card / Online</div>
+                      <div className="font-label-sm text-neutral-400">Coming soon</div>
+                    </div>
+                  </button>
+                </div>
+              </section>
+
               {/* Contact */}
               <section aria-label="Contact details">
                 <h3 className="font-label-lg text-label-lg font-bold text-[#0a0a0a] mb-3">
                   Your contact details
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label
                       htmlFor="c-name"
@@ -351,7 +416,6 @@ export default function ConfirmationModal({
                     >
                       Email address
                     </label>
-
                     <input
                       id="c-email"
                       type="email"
@@ -360,17 +424,14 @@ export default function ConfirmationModal({
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
                       autoComplete="email"
-                      aria-invalid={!!errors.email}
                       required
                     />
-
                     {errors.email && (
                       <p className="mt-1 text-xs text-[#ba1a1a]">
                         {errors.email}
                       </p>
                     )}
                   </div>
-
                 </div>
               </section>
             </div>
@@ -387,12 +448,15 @@ export default function ConfirmationModal({
               </div>
               <button
                 onClick={confirm}
-                className="group ml-auto h-14 px-6 sm:px-10 bg-[#0a0a0a] hover:bg-[#1f1f1f] text-white rounded-xl font-headline-sm text-headline-sm flex items-center gap-3 transition-all active:scale-[0.99]"
+                disabled={loading}
+                className="group ml-auto h-14 px-6 sm:px-10 bg-[#0a0a0a] hover:bg-[#1f1f1f] text-white rounded-xl font-headline-sm text-headline-sm flex items-center gap-3 transition-all active:scale-[0.99] disabled:opacity-50"
               >
-                Confirm booking
-                <span className="material-symbols-outlined text-[20px] text-[#e5a910] transition-transform group-hover:translate-x-1">
-                  arrow_forward
-                </span>
+                {loading ? "Processing..." : "Confirm booking"}
+                {!loading && (
+                  <span className="material-symbols-outlined text-[20px] text-[#e5a910] transition-transform group-hover:translate-x-1">
+                    arrow_forward
+                  </span>
+                )}
               </button>
             </div>
           </>
