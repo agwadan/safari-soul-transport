@@ -1,8 +1,11 @@
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import { importLibrary, setOptions } from "@googlemaps/js-api-loader";
 import Icon from "../components/ui/Icons";
+
+const DEFAULT_COUNTRY_CODES = ["ke", "ug"] as const;
 
 interface LocationAutocompleteProps {
   id: string;
@@ -18,7 +21,7 @@ interface LocationAutocompleteProps {
   icon: "my_location" | "location_on";
   iconClassName: string;
   inputClassName: string;
-  countryCode?: string;
+  countryCode?: string | readonly string[];
 }
 
 interface Suggestion {
@@ -26,6 +29,29 @@ interface Suggestion {
   text: string;
   description: string;
   placeId: string;
+}
+
+// Share the library-loading promise between component instances.
+let placesLibraryPromise: Promise<google.maps.PlacesLibrary> | null = null;
+
+function loadPlacesLibrary(
+  apiKey: string
+): Promise<google.maps.PlacesLibrary> {
+  if (!placesLibraryPromise) {
+    setOptions({
+      key: apiKey,
+      v: "weekly",
+    });
+
+    placesLibraryPromise = importLibrary("places")
+      .then((library) => library as google.maps.PlacesLibrary)
+      .catch((error) => {
+        placesLibraryPromise = null;
+        throw error;
+      });
+  }
+
+  return placesLibraryPromise;
 }
 
 export default function LocationAutocomplete({
@@ -37,27 +63,39 @@ export default function LocationAutocomplete({
   icon,
   iconClassName,
   inputClassName,
-  countryCode = "ke",
+  countryCode = DEFAULT_COUNTRY_CODES,
 }: LocationAutocompleteProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
 
-  const [places, setPlaces] = useState<typeof google.maps.places | null>(null);
-
-  const [sessionToken, setSessionToken] =
-    useState<google.maps.places.AutocompleteSessionToken | null>(null);
+  const [places, setPlaces] =
+    useState<google.maps.PlacesLibrary | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const requestId = useRef(0);
-  const selectedValue = useRef<string | null>(null);
 
-  // Load the Places library once for this component.
+  // Keep the session token in a ref so updating it doesn't retrigger
+  // the autocomplete effect.
+  const sessionTokenRef =
+    useRef<google.maps.places.AutocompleteSessionToken | null>(null);
+
+  // Use a stable primitive dependency instead of an array that may be
+  // recreated on every render.
+  const countryCodesKey =
+    typeof countryCode === "string"
+      ? countryCode
+      : countryCode.join(",");
+
+  const includedRegionCodes = countryCodesKey
+    .split(",")
+    .map((code) => code.trim())
+    .filter(Boolean);
+
+  // Load Google Places once per module, shared by all instances.
   useEffect(() => {
     let cancelled = false;
-
-    console.log(process.env);
 
     const key = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
 
@@ -66,15 +104,11 @@ export default function LocationAutocomplete({
       return;
     }
 
-    setOptions({
-      key,
-      v: "weekly",
-    });
-
-    importLibrary("places")
+    loadPlacesLibrary(key)
       .then((library) => {
         if (!cancelled) {
-          setPlaces(library as google.maps.PlacesLibrary);
+          setPlaces(library);
+          setError("");
         }
       })
       .catch(() => {
@@ -105,32 +139,37 @@ export default function LocationAutocomplete({
 
   // Fetch predictions as the user types.
   useEffect(() => {
+    // Invalidate any earlier request, including when the dropdown closes.
+    const currentRequest = ++requestId.current;
+
     if (!places || !open || value.trim().length < 3) {
-      setSuggestions([]);
-      setLoading(false);
+      setSuggestions((current) =>
+        current.length > 0 ? [] : current
+      );
+      setLoading((current) => (current ? false : current));
       return;
     }
-
-    const currentRequest = ++requestId.current;
 
     const timeout = window.setTimeout(async () => {
       setLoading(true);
       setError("");
 
       try {
-        const token = sessionToken ?? new places.AutocompleteSessionToken();
+        const token =
+          sessionTokenRef.current ??
+          new places.AutocompleteSessionToken();
 
-        if (!sessionToken) {
-          setSessionToken(token);
-        }
+        sessionTokenRef.current = token;
 
         const { suggestions: results = [] } =
           await places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
-            input: value,
+            input: value.trim(),
             sessionToken: token,
-            includedRegionCodes: [countryCode],
+            includedRegionCodes,
           });
 
+        // Ignore stale responses if the user has typed again or closed
+        // the dropdown.
         if (currentRequest !== requestId.current) {
           return;
         }
@@ -138,13 +177,16 @@ export default function LocationAutocomplete({
         const mapped: Suggestion[] = results.flatMap((result) => {
           const prediction = result.placePrediction;
 
-          if (!prediction) return [];
+          if (!prediction) {
+            return [];
+          }
 
           return [
             {
               prediction,
               text: prediction.text.toString(),
-              description: prediction.secondaryText?.toString() ?? "",
+              description:
+                prediction.secondaryText?.toString() ?? "",
               placeId: prediction.placeId,
             },
           ];
@@ -164,18 +206,20 @@ export default function LocationAutocomplete({
       }
     }, 300);
 
-    return () => window.clearTimeout(timeout);
-  }, [value, open, places, countryCode, sessionToken]);
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [value, open, places, countryCodesKey]);
 
   async function selectSuggestion(item: Suggestion) {
-    // Ignore pending responses for the previous input.
+    // Ignore outstanding requests for the previous input.
     requestId.current++;
+
     setOpen(false);
     setSuggestions([]);
     setLoading(false);
 
     onChange(item.text);
-    selectedValue.current = item.text;
 
     try {
       const place = item.prediction.toPlace();
@@ -185,11 +229,9 @@ export default function LocationAutocomplete({
       });
 
       const address = place.formattedAddress || item.text;
-
       const location = place.location;
 
       onChange(address);
-      selectedValue.current = address;
 
       onSelect?.({
         address,
@@ -198,14 +240,14 @@ export default function LocationAutocomplete({
         lng: location?.lng(),
       });
     } catch {
-      // The prediction remains usable if details fail.
+      // The prediction remains usable if fetching place details fails.
       onSelect?.({
         address: item.text,
         placeId: item.placeId,
       });
     } finally {
       // A selection completes this autocomplete session.
-      setSessionToken(null);
+      sessionTokenRef.current = null;
     }
   }
 
@@ -232,7 +274,6 @@ export default function LocationAutocomplete({
         onFocus={() => setOpen(true)}
         onChange={(event) => {
           onChange(event.target.value);
-          selectedValue.current = null;
           setOpen(true);
         }}
         onKeyDown={(event) => {
@@ -292,11 +333,15 @@ export default function LocationAutocomplete({
           )}
 
           {error && (
-            <p className="px-4 py-3 text-sm text-neutral-500">{error}</p>
+            <p className="px-4 py-3 text-sm text-neutral-500">
+              {error}
+            </p>
           )}
 
           <div className="border-t border-neutral-100 px-3 py-2 text-right">
-            <span className="text-xs text-neutral-500">Powered by Google</span>
+            <span className="text-xs text-neutral-500">
+              Powered by Google
+            </span>
           </div>
         </div>
       )}
