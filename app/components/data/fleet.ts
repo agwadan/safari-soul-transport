@@ -43,7 +43,7 @@ export const fleet: Vehicle[] = [
       { icon: "luggage", text: "2 Bags" },
       { icon: "wifi", text: "Free" },
     ],
-    maxPassengers: 5,
+    maxPassengers: 2,
     maxSuitcases: 2,
     priceKes: 10000,
     priceUsd: 75,
