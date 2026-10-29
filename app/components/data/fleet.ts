@@ -34,7 +34,7 @@ export const fleet: Vehicle[] = [
   {
     id: "vw-arteon",
     tier: "Luxury",
-    name: "Volkswagen Arteon",
+    name: "Luxury Sedan",
     model: "Volkswagen Arteon",
     image:
       "/images/fleet/arteon.jpg",
@@ -52,7 +52,7 @@ export const fleet: Vehicle[] = [
   {
     id: "toyota-noah",
     tier: "Family / Group",
-    name: "Toyota Noah",
+    name: "Mini Van",
     model: "Toyota Noah MPV",
     image:
       "/images/fleet/toyota-noah.jpg",
@@ -70,7 +70,7 @@ export const fleet: Vehicle[] = [
   {
     id: "coaster-bus",
     tier: "Large Group",
-    name: "Coaster Bus",
+    name: "Bus",
     model: "Toyota Coaster Executive",
     image:
       "/images/fleet/coaster_2.png",

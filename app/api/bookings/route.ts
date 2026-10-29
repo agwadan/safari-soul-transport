@@ -6,7 +6,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 // List of your team member emails
 const TEAM_EMAILS = [
-  "stevenaraka@gmail.com",
+  /* "stevenaraka@gmail.com", */
   "agwa.dan@gmail.com",
   "safarisoul91@gmail.com",
   // Add as many team emails here as you need
@@ -72,9 +72,7 @@ export async function POST(request: Request) {
                     <h3 style="margin:0;font-size:17px;font-weight:600;">
                       ${vehicle.name}
                     </h3>
-                    <p style="margin:5px 0 0;color:#77767b;font-size:12px;">
-                      ${vehicle.model}
-                    </p>
+                   
                   </div>
       
                   <div style="padding:20px;">
