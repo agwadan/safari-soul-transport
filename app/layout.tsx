@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
+import TawkChat from "./components/TawkChat";
 
 const manrope = Manrope({ subsets: ["latin"] });
 
@@ -26,7 +27,11 @@ export default function RootLayout({
         className={`${manrope.className} bg-background text-on-surface antialiased selection:bg-[#e5a910] selection:text-black`}
       >
         {children}
+        <TawkChat />
       </body>
     </html>
   );
 }
+
+
+

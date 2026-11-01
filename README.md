@@ -34,3 +34,36 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Live chat (tawk.to)
+
+The root layout mounts `app/components/TawkChat.tsx` once across all pages.
+Next.js Script loads the widget after hydration and preserves it across client
+navigation without inserting duplicate scripts.
+
+Configure these public identifiers in `.env` locally and in your hosting
+provider's environment settings before building/deploying:
+
+```dotenv
+NEXT_PUBLIC_TAWK_PROPERTY_ID=6ae74d1c052a1a3c2f63cd66
+NEXT_PUBLIC_TAWK_WIDGET_ID=1k6boaef8
+```
+
+Restart development after changing these values. Rebuild/redeploy production.
+Both values are public widget identifiers, not account credentials. Missing or
+invalid values disable the widget.
+
+Staff reply at https://dashboard.tawk.to/ or from the tawk.to mobile app.
+Sign in to the same property, enable notifications, and set availability online.
+Configure branding, the greeting, and offline messages in the tawk.to dashboard.
+
+PostHog analytics remains enabled. `disable_conversations: true` in
+`instrumentation-client.ts` disables its Support widget to avoid two chat buttons,
+including when the PostHog dashboard's widget setting is enabled.
+
+To verify: fully reload the site in a private window, confirm only the tawk.to
+bubble appears, navigate between home and policy pages, then send a test message
+and reply from the tawk.to dashboard or mobile app. Check that the reply appears
+on the site and that mobile notifications arrive when the app is in the background.
+
+Documentation: https://help.tawk.to/article/adding-a-widget-to-your-website

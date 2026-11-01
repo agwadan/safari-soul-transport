@@ -15,14 +15,14 @@ export default function TopBar() {
             +254 (0) 792 485 814 / +256 (0) 705 530 039
           </span>
         </div>
-        <div className="flex items-center">
+        {/* <div className="flex items-center">
           <Link
             className="hover:text-white transition-colors font-label-sm text-label-sm text-gray-400"
             href="#support"
           >
             Support & FAQ
           </Link>
-        </div>
+        </div> */}
       </div>
   </div>
   );
