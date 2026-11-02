@@ -65,22 +65,22 @@ export default function Footer() {
 
             <ul className="space-y-3 text-sm leading-5 text-neutral-400">
               <li>
-                <Link href="#booking" className="transition-colors hover:text-[#e5a910]">
+                <Link href="/#hero" className="transition-colors hover:text-[#e5a910]">
                   Airport Transfers
                 </Link>
               </li>
               <li>
-                <Link href="#services" className="transition-colors hover:text-[#e5a910]">
+                <Link href="/#services" className="transition-colors hover:text-[#e5a910]">
                   City Transfers
                 </Link>
               </li>
               <li>
-                <Link href="#services" className="transition-colors hover:text-[#e5a910]">
+                <Link href="/#services" className="transition-colors hover:text-[#e5a910]">
                   Intercity Travel
                 </Link>
               </li>
               <li>
-                <Link href="#services" className="transition-colors hover:text-[#e5a910]">
+                <Link href="/#services" className="transition-colors hover:text-[#e5a910]">
                   Event Logistics
                 </Link>
               </li>
@@ -95,8 +95,8 @@ export default function Footer() {
 
             <ul className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm leading-5 text-neutral-400 sm:grid-cols-1">
               <li>
-                <Link href="/support" className="transition-colors hover:text-[#e5a910]">
-                  Support &amp; FAQ
+                <Link href="/contact" className="transition-colors hover:text-[#e5a910]">
+                  Contact &amp; Support
                 </Link>
               </li>
               <li>
@@ -149,3 +149,4 @@ export default function Footer() {
     </footer>
   );
 }
+

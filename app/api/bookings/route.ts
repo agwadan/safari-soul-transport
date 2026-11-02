@@ -230,7 +230,21 @@ export async function POST(request: Request) {
     });
 
     // Run both emails concurrently
-    await Promise.all([customerEmailPromise, teamEmailPromise]);
+    const [customerResult, teamResult] = await Promise.all([customerEmailPromise, teamEmailPromise]);
+    // Resend resolves with { data, error } on provider failures; it does not
+    // necessarily throw. Check each result before confirming success.
+    if (customerResult.error || teamResult.error) {
+      for (const [recipient, result] of [["customer", customerResult], ["team", teamResult]] as const) {
+        if (result.error) {
+          console.error(`[bookings] Resend rejected ${recipient} email`, {
+            name: result.error.name,
+            statusCode: result.error.statusCode,
+            message: result.error.message,
+          });
+        }
+      }
+      return NextResponse.json({ error: "We couldn’t send all booking notifications. Please contact our team to confirm your booking." }, { status: 502 });
+    }
     console.log('confirmation emails sent successfully ✅');
 
     return NextResponse.json({ success: true });

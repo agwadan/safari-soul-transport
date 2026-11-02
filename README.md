@@ -67,3 +67,20 @@ and reply from the tawk.to dashboard or mobile app. Check that the reply appears
 on the site and that mobile notifications arrive when the app is in the background.
 
 Documentation: https://help.tawk.to/article/adding-a-widget-to-your-website
+
+## Contact page
+
+`/contact` includes regional phone links, info@safarisoul.africa, a tawk.to chat
+launcher, and an enquiry form. Desktop/mobile navigation and the footer link to it.
+
+`POST /api/contact` uses the existing RESEND_API_KEY and verified sender
+info@safarisoul.africa. Enquiries go to the same two team inboxes as bookings,
+with the customer's address as Reply-To. No customer confirmation email is sent.
+The handler validates input, limits body size, rejects cross-origin browser
+requests, and includes a honeypot. It reports provider errors rather than showing
+a false success. Configure hosting-level rate limiting on this public endpoint
+if spam becomes an issue; the honeypot is not a complete bot protection system.
+
+Before launch, verify a real enquiry reaches the team and that Reply replies to
+the customer. WhatsApp links and specific email/chat response hours are omitted
+pending confirmation. The existing site-wide dispatch banner is reused.

@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Icon from "../ui/Icons";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
   return (
     <header className="w-full sticky top-0 z-50 bg-white border-b border-border-hairline shadow-sm">
       <div className="w-full flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-margin max-w-7xl mx-auto h-14 sm:h-16 md:h-20">
@@ -30,11 +32,11 @@ export default function Header() {
 
         <nav className="hidden md:flex items-center space-x-8">
           <Link
-            className="text-[#0a0a0a] font-label-lg text-label-lg border-b-2 border-[#0a0a0a] pb-1 transition-all duration-150 ease-in-out cursor-pointer relative"
+            className="text-[#0a0a0a] font-label-lg text-label-lg pb-1 transition-all duration-150 ease-in-out cursor-pointer relative"
             href="/#hero"
           >
             Airport Transfers
-            <span className="absolute -bottom-[2px] left-0 right-0 h-[2px] bg-[#e5a910]"></span>
+            {pathname === "/" && <span className="absolute -bottom-[2px] left-0 right-0 h-[2px] bg-[#e5a910]" />}
           </Link>
           {/*  <Link
             className="text-[#555558] font-label-lg text-label-lg transition-colors hover:text-[#0a0a0a] hover:border-b-2 hover:border-[#0a0a0a] pb-1 transition-all duration-150 ease-in-out cursor-pointer"
@@ -60,6 +62,14 @@ export default function Header() {
           >
             Corporate
           </Link> */}
+          <Link
+            href="/contact"
+            aria-current={pathname === "/contact" ? "page" : undefined}
+            className={`font-label-lg text-label-lg transition-colors hover:text-[#0a0a0a] hover:border-b-2 hover:border-[#0a0a0a] pb-1 transition-all duration-150 ease-in-out cursor-pointer relative ${pathname === "/contact" ? "text-[#0a0a0a]" : "text-[#555558]"}`}
+          >
+            Contact
+            {pathname === "/contact" && <span className="absolute -bottom-[2px] left-0 right-0 h-[2px] bg-[#e5a910]" />}
+          </Link>
         </nav>
         {/* Mobile menu */}
         {menuOpen && (
@@ -85,6 +95,14 @@ export default function Header() {
                 onClick={() => setMenuOpen(false)}
               >
                 How It Works
+              </Link>
+              <Link
+                onClick={() => setMenuOpen(false)}
+                href="/contact"
+                aria-current={pathname === "/contact" ? "page" : undefined}
+                className={`font-label-lg text-label-lg py-2 ${pathname === "/contact" ? "text-[#0a0a0a]" : "text-[#555558]"}`}
+              >
+                Contact
               </Link>
             </nav>
           </div>
@@ -120,3 +138,4 @@ export default function Header() {
     </header>
   );
 }
+
