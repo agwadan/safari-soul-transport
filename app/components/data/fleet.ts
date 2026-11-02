@@ -19,7 +19,7 @@ export const fleet: Vehicle[] = [
     name: "Mazda 3 Sedan",
     model: "Mazda 3 Sedan",
     image:
-      "/images/fleet/axela.png",
+      "/images/fleet/mazda-3.png",
     specs: [
       { icon: "person", text: "3 Pax" },
       { icon: "luggage", text: "2 Bags" },
