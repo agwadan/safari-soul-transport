@@ -4,6 +4,7 @@ import TopBar from "../components/layout/TopBar";
 import Header from "../components/layout/Header";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/terms-of-service" },
   title: "Terms and Conditions | SafariSoul",
   description:
     "Read the terms governing SafariSoul airport transfers, chauffeur services, bookings, pricing, and cancellations.",

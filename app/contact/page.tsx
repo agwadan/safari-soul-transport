@@ -8,6 +8,7 @@ import ChatButton from "../components/contact/ChatButton";
 import ContactForm from "../components/contact/ContactForm";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/contact" },
   title: "Contact Us | SafariSoul",
   description: "Contact SafariSoul for airport transfer enquiries and help with an existing booking in Kenya and Uganda. Call, email, or chat with our team.",
 };

@@ -3,6 +3,7 @@ import TopBar from "../components/layout/TopBar";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 export const metadata: Metadata = {
+  alternates: { canonical: "/privacy-policy" },
   title: "Privacy Policy | SafariSoul",
   description:
     "Learn how SafariSoul collects, uses, stores, and protects personal information when you use our airport transfer and chauffeur services.",

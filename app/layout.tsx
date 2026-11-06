@@ -6,8 +6,10 @@ import TawkChat from "./components/TawkChat";
 const manrope = Manrope({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "SafariSoul — Executive Airport Transfers & Chauffeur Services",
-  description: "Executive Mobility",
+  metadataBase: new URL("https://airport.safarisoul.africa"),
+  title: "Kenya & Uganda Airport Transfers | SafariSoul",
+  description:
+    "Book airport transfers from JKIA in Nairobi and Entebbe with SafariSoul. Choose your vehicle, calculate Kenya fares, or request a custom quote for Uganda.",
 };
 
 export default function RootLayout({

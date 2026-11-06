@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import TopBar from "@/components/layout/TopBar";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -8,6 +9,10 @@ import MobilityServices from "@/components/home/MobilityServices";
 import HowItWorks from "@/components/home/HowItWorks";
 import TrustCredentials from "@/components/home/TrustCredentials";
 import { getKesToUsdRate } from "@/app/lib/exchange-rate";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default async function Page() {
   const kesToUsd = await getKesToUsdRate();
