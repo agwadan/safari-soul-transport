@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import useTripQuote from "./useTripQuote";
+import QuoteLoading from "./QuoteLoading";
 import ConfirmationModal from "./ConfirmationModal";
 import Icon, { type IconName } from "../ui/Icons";
 import LocationAutocomplete from "../LocationAutoComplete";
@@ -81,6 +83,7 @@ export default function BookingWidget({
   const [counts, setCounts] = useState<Counts>(DEFAULT_COUNTS);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [modalOpen, setModalOpen] = useState(false);
+  const quoteState = useTripQuote(trip, step === 2);
   const closeModal = useCallback(() => {
     setModalOpen(false);
     setStep(1);
@@ -437,6 +440,8 @@ export default function BookingWidget({
             ))}
           </div>
 
+          {quoteState.quoteLoading && <div className="mt-4"><QuoteLoading compact /></div>}
+
           <div className="flex items-center gap-4 pt-5">
             <button
               type="button"
@@ -464,6 +469,7 @@ export default function BookingWidget({
 
       {modalOpen && (
         <ConfirmationModal
+          quoteState={quoteState}
           trip={trip}
           counts={counts}
           kesToUsd={kesToUsd}

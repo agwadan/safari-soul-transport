@@ -11,9 +11,13 @@ import {
 } from "../data/booking";
 import { fleet, formatKes, formatUsd } from "../data/fleet";
 import Link from "next/link";
-import { formatDistance, formatDuration, type QuoteResponse } from "../../lib/pricing";
+import { formatDistance, formatDuration } from "../../lib/pricing";
+
+import type useTripQuote from "./useTripQuote";
+import QuoteLoading from "./QuoteLoading";
 
 type Props = {
+  quoteState: ReturnType<typeof useTripQuote>;
   trip: TripDetails;
   counts: Counts;
   kesToUsd: number | null;
@@ -28,6 +32,7 @@ export default function ConfirmationModal({
   counts,
   kesToUsd,
   onClose,
+  quoteState,
 }: Props) {
   const [vehicleId, setVehicleId] = useState<string | null>(null);
   const [name, setName] = useState("");
@@ -39,43 +44,7 @@ export default function ConfirmationModal({
   const [done, setDone] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const submitting = useRef(false);
-  const [quote, setQuote] = useState<QuoteResponse | null>(null);
-  const [quoteLoading, setQuoteLoading] = useState(true);
-  const [quoteError, setQuoteError] = useState("");
-  const [quoteAttempt, setQuoteAttempt] = useState(0);
-  const [expired, setExpired] = useState(false);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    let active = true;
-    async function loadQuote() {
-      setQuoteLoading(true);
-      setQuote(null);
-      setQuoteError("");
-      setExpired(false);
-      try {
-        const response = await fetch("/api/quotes", {
-          method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ trip }), signal: controller.signal,
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || "Could not calculate prices.");
-        if (active) setQuote(data);
-      } catch (error) {
-        if (active) setQuoteError(error instanceof Error ? error.message : "Could not calculate prices.");
-      } finally {
-        if (active) setQuoteLoading(false);
-      }
-    }
-    void loadQuote();
-    return () => { active = false; controller.abort(); };
-  }, [trip, quoteAttempt]);
-
-  useEffect(() => {
-    if (!quote) return;
-    const timer = window.setTimeout(() => setExpired(true), Math.max(0, quote.expiresAt - Date.now()));
-    return () => window.clearTimeout(timer);
-  }, [quote]);
+  const { quote, quoteLoading, quoteError, expired, setExpired, refreshQuote } = quoteState;
 
   const fareFor = (id: string) => quote?.fares.find((fare) => fare.vehicleId === id);
   const selectedFare = vehicleId ? fareFor(vehicleId) : undefined;
@@ -267,20 +236,33 @@ export default function ConfirmationModal({
                 </dl>
               </section>
 
-              <section aria-label="Route and fare" className="rounded-2xl border border-[#e5a910]/40 bg-[#fdf6e2] p-4 text-sm">
-                <div role="status" aria-live="polite">
-                  {quoteLoading && <p>Calculating driving distance and vehicle fares…</p>}
-                  {quoteError && <p>{quoteError}</p>}
-                  {quote && quote.legs.map((leg, index) => <p key={index} className="mb-2"><strong>{index === 0 ? "Outbound" : "Return"}:</strong> {formatDistance(leg.distanceMeters)} · approximately {formatDuration(leg.durationSeconds)}</p>)}
-                  {expired && <p className="font-semibold">Your quote has expired. Refresh prices before booking.</p>}
-                </div>
-                <p className="mt-2">Each leg includes 40 km. Every started 5 km beyond that is charged at your vehicle’s rate. Return trips include a separate base fare for each leg.</p>
-                {quote && <p className="mt-2 text-xs text-neutral-600">Driving distance by Google Maps. Travel time excludes live traffic. Quote valid for 15 minutes.</p>}
-                {(quoteError || expired) && <div className="mt-3 flex flex-wrap gap-4"><button type="button" disabled={quoteLoading || loading} onClick={() => { setQuoteAttempt((attempt) => attempt + 1); setErrors({}); }} className="font-semibold underline underline-offset-4">Refresh prices</button><Link href="/contact" className="font-semibold underline underline-offset-4">Request a custom quote</Link></div>}
+              <section aria-label="Route and fare" aria-busy={quoteLoading}>
+                {quoteLoading ? <QuoteLoading /> : (
+                  <div role="status" aria-live="polite">
+                    {quote && <div className="flex flex-wrap gap-x-8 gap-y-3 border-y border-neutral-200 py-4">
+                      {quote.legs.map((leg, index) => (
+                        <div key={index}>
+                          <p className="font-label-sm text-label-sm text-neutral-500">{index === 0 ? "Outbound journey" : "Return journey"}</p>
+                          <p className="mt-1 font-body-md text-body-md font-semibold text-[#0a0a0a]">
+                            {formatDistance(leg.distanceMeters)} <span className="px-1 text-neutral-300">·</span> <span className="font-normal text-neutral-600">~{formatDuration(leg.durationSeconds)}</span>
+                          </p>
+                        </div>
+                      ))}
+                      <p className="w-full text-xs text-neutral-500">Google Maps estimate · Excludes live traffic</p>
+                    </div>}
+                    {(quoteError || expired) && <div className="rounded-xl bg-neutral-100 p-4">
+                      <p className="font-body-sm text-body-sm text-neutral-700">{quoteError || "Your quote has expired. Refresh prices to continue."}</p>
+                      <div className="mt-3 flex flex-wrap gap-4 font-label-sm text-label-sm">
+                        <button type="button" disabled={loading} onClick={() => { refreshQuote(); setErrors({}); }} className="font-semibold underline underline-offset-4">Refresh prices</button>
+                        <Link href="/contact" className="font-semibold underline underline-offset-4">Request a custom quote</Link>
+                      </div>
+                    </div>}
+                  </div>
+                )}
               </section>
 
               {/* Vehicle selection */}
-              <section aria-label="Choose a vehicle">
+              {quote && !quoteLoading && !expired && <section aria-label="Choose a vehicle">
                 <h3 className="font-label-lg text-label-lg font-bold text-[#0a0a0a] mb-3">
                   Choose your vehicle
                 </h3>
@@ -383,9 +365,9 @@ export default function ConfirmationModal({
                     {errors.vehicle}
                   </p>
                 )}
-              </section>
+              </section>}
 
-              {selectedFare && <section aria-label="Fare breakdown" className="rounded-2xl bg-neutral-100 p-4 text-sm space-y-2">
+              {selectedFare && !quoteLoading && !expired && <section aria-label="Fare breakdown" className="rounded-2xl bg-neutral-100 p-4 text-sm space-y-2">
                 <h3 className="font-bold">Your fare breakdown</h3>
                 {selectedFare.legTotalsKes.map((total, index) => <p key={index}>{index === 0 ? "Outbound" : "Return"}: {formatKes(selectedFare.baseKes)} base + {selectedFare.extraBlocks[index]} × {formatKes(selectedFare.extraBlockKes)} = <strong>{formatKes(total)}</strong></p>)}
                 <p>Payable in KES. USD amounts are approximate{kesToUsd ? "." : " and currently unavailable."}</p>

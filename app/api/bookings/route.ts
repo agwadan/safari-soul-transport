@@ -106,7 +106,7 @@ export async function POST(request: Request) {
           " (EAT)</p>"
         : "");
 
-    console.log("sending confirmation email to the customer");
+    console.log(" 📧 Sending confirmation email to the customer: ➡️ ✉️", email);
     // 1. Send confirmation email to the Customer
     const customerEmailPromise = resend.emails.send({
       from: customerFrom,
