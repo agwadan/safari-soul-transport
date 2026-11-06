@@ -73,9 +73,12 @@ Documentation: https://help.tawk.to/article/adding-a-widget-to-your-website
 `/contact` includes regional phone links, info@safarisoul.africa, a tawk.to chat
 launcher, and an enquiry form. Desktop/mobile navigation and the footer link to it.
 
-`POST /api/contact` uses the existing RESEND_API_KEY and verified sender
-info@safarisoul.africa. Enquiries go to the same two team inboxes as bookings,
-with the customer's address as Reply-To. No customer confirmation email is sent.
+`POST /api/contact` and `POST /api/bookings` send mail with `RESEND_API_KEY`.
+The sender and staff recipients come from `RESEND_FROM_EMAIL` and
+`RESEND_STAFF_EMAILS` so local and production can differ. Use
+`onboarding@resend.dev` in development; set the verified domain address and
+live staff list in Vercel for production. Contact enquiries use the customer's
+address as Reply-To. No customer confirmation email is sent from the contact form.
 The handler validates input, limits body size, rejects cross-origin browser
 requests, and includes a honeypot. It reports provider errors rather than showing
 a false success. Configure hosting-level rate limiting on this public endpoint

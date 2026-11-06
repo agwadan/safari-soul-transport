@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { fleet } from "../../components/data/fleet";
 import { QuoteError, verifyQuote } from "../../lib/quote-server";
 import { formatDistance, formatDuration } from "../../lib/pricing";
+import { getResendFrom, getStaffEmails } from "../../lib/resend";
 
 const escapeHtml = (value: string) =>
   value.replace(
@@ -12,14 +13,6 @@ const escapeHtml = (value: string) =>
         char
       ]!,
   );
-
-// List of your team member emails
-const TEAM_EMAILS = [
-  "stevenaraka@gmail.com",
-  "agwa.dan@gmail.com",
-  "safarisoul91@gmail.com",
-  // Add as many team emails here as you need
-];
 
 export async function POST(request: Request) {
   try {
@@ -61,7 +54,10 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    if (!process.env.RESEND_API_KEY)
+    const customerFrom = getResendFrom("Safari Soul Dispatch");
+    const teamFrom = getResendFrom("Safari Soul System");
+    const staffEmails = getStaffEmails();
+    if (!process.env.RESEND_API_KEY || !customerFrom || !teamFrom || staffEmails.length === 0)
       return NextResponse.json(
         {
           error: "Booking notifications are unavailable. Please call dispatch.",
@@ -113,7 +109,7 @@ export async function POST(request: Request) {
     console.log("sending confirmation email to the customer");
     // 1. Send confirmation email to the Customer
     const customerEmailPromise = resend.emails.send({
-      from: "Safari Soul Dispatch <info@safarisoul.africa>",
+      from: customerFrom,
       to: [email],
       subject: `Booking Confirmed: ${vehicle.name} (${trip.pickup} to ${trip.destination})`,
       html: `
@@ -287,8 +283,8 @@ export async function POST(request: Request) {
 
     // 2. Send notification email to the Internal Team
     const teamEmailPromise = resend.emails.send({
-      from: "Safari Soul System <info@safarisoul.africa>",
-      to: TEAM_EMAILS,
+      from: teamFrom,
+      to: staffEmails,
       subject: `🚨 New Booking: ${name} - ${vehicle.name} (${trip.date})`,
       html: `
         <div style="font-family: Arial, sans-serif; color: #111; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #0a0a0a; border-radius: 12px;">

@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { getResendFrom, getStaffEmails } from "../../lib/resend";
 
 const MAX_BODY_BYTES = 24_000;
 const EMAIL_PATTERN = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
@@ -46,15 +47,17 @@ export async function POST(request: Request) {
   if (!name || name.length > 100 || /[\r\n]/.test(name) || email.length > 254 || !EMAIL_PATTERN.test(email) || message.length < 10 || message.length > 5000 || bookingReference.length > 100 || /[\r\n]/.test(bookingReference)) {
     return Response.json({ error: "Enter your name, a valid email, and a message between 10 and 5,000 characters." }, { status: 400 });
   }
-  if (!process.env.RESEND_API_KEY) {
+  const from = getResendFrom("SafariSoul Enquiries");
+  const staffEmails = getStaffEmails();
+  if (!process.env.RESEND_API_KEY || !from || staffEmails.length === 0) {
     return Response.json({ error: "The contact form is temporarily unavailable. Please email info@safarisoul.africa or call us." }, { status: 503 });
   }
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
     const { error } = await resend.emails.send({
-      from: "SafariSoul Enquiries <info@safarisoul.africa>",
-      to: ["agwa.dan@gmail.com", "safarisoul91@gmail.com"],
+      from,
+      to: staffEmails,
       replyTo: email,
       subject: bookingReference ? "SafariSoul: existing booking enquiry" : "SafariSoul: new contact enquiry",
       text: `Name: ${name}\nEmail: ${email}\nBooking reference: ${bookingReference || "Not provided"}\n\n${message}`,
