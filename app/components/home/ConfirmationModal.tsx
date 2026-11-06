@@ -9,7 +9,9 @@ import {
   formatTime,
   plural,
 } from "../data/booking";
-import { convertKesToUsd, fleet, formatKes, formatUsd } from "../data/fleet";
+import { fleet, formatKes, formatUsd } from "../data/fleet";
+import Link from "next/link";
+import { formatDistance, formatDuration, type QuoteResponse } from "../../lib/pricing";
 
 type Props = {
   trip: TripDetails;
@@ -36,6 +38,48 @@ export default function ConfirmationModal({
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const submitting = useRef(false);
+  const [quote, setQuote] = useState<QuoteResponse | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(true);
+  const [quoteError, setQuoteError] = useState("");
+  const [quoteAttempt, setQuoteAttempt] = useState(0);
+  const [expired, setExpired] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+    async function loadQuote() {
+      setQuoteLoading(true);
+      setQuote(null);
+      setQuoteError("");
+      setExpired(false);
+      try {
+        const response = await fetch("/api/quotes", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ trip }), signal: controller.signal,
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Could not calculate prices.");
+        if (active) setQuote(data);
+      } catch (error) {
+        if (active) setQuoteError(error instanceof Error ? error.message : "Could not calculate prices.");
+      } finally {
+        if (active) setQuoteLoading(false);
+      }
+    }
+    void loadQuote();
+    return () => { active = false; controller.abort(); };
+  }, [trip, quoteAttempt]);
+
+  useEffect(() => {
+    if (!quote) return;
+    const timer = window.setTimeout(() => setExpired(true), Math.max(0, quote.expiresAt - Date.now()));
+    return () => window.clearTimeout(timer);
+  }, [quote]);
+
+  const fareFor = (id: string) => quote?.fares.find((fare) => fare.vehicleId === id);
+  const selectedFare = vehicleId ? fareFor(vehicleId) : undefined;
+  const displayedTrip = quote?.trip ?? trip;
 
   const available = fleet.filter(
     (v) =>
@@ -58,6 +102,8 @@ export default function ConfirmationModal({
   }, [onClose]);
 
   async function confirm() {
+    if (submitting.current) return;
+    if (!quote || quoteLoading || expired || Date.now() >= quote.expiresAt) { setExpired(true); return; }
     const found: Record<string, string> = {};
     if (!selected) found.vehicle = "Please select a vehicle";
     if (!name.trim()) found.name = "Required";
@@ -70,6 +116,7 @@ export default function ConfirmationModal({
     setErrors(found);
     if (Object.keys(found).length) return;
 
+    submitting.current = true;
     setLoading(true);
     try {
       const res = await fetch("/api/bookings", {
@@ -78,7 +125,8 @@ export default function ConfirmationModal({
         body: JSON.stringify({
           trip,
           counts,
-          vehicle: selected,
+          vehicleId: selected?.id,
+          quoteToken: quote.token,
           name,
           phone,
           email,
@@ -86,24 +134,29 @@ export default function ConfirmationModal({
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to submit booking");
+      if (!res.ok) {
+        const result = await res.json().catch(() => ({}));
+        if (res.status === 409) setExpired(true);
+        throw new Error(result.error || "Failed to submit booking");
+      }
       setDone(true);
     } catch (err) {
-      console.error(err);
-      alert("Something went wrong. Please try again or call dispatch.");
+      setErrors((previous) => ({ ...previous, submit: err instanceof Error ? err.message : "Please try again or contact dispatch." }));
     } finally {
+      submitting.current = false;
       setLoading(false);
     }
   }
 
   const rows: { icon: string; label: string; value: string }[] = [
-    { icon: "my_location", label: "Pickup", value: trip.pickup },
-    { icon: "location_on", label: "Drop-off", value: trip.destination },
+    { icon: "my_location", label: "Pickup", value: displayedTrip.pickup },
+    { icon: "location_on", label: "Drop-off", value: displayedTrip.destination },
     {
       icon: "calendar_today",
       label: "Date & time",
       value: `${formatDate(trip.date)} · ${formatTime(trip.time)}`,
     },
+    ...(trip.tripType === "return" ? [{ icon: "calendar_today", label: "Return date & time", value: `${formatDate(trip.returnDate)} · ${formatTime(trip.returnTime)} (EAT)` }] : []),
     ...(trip.flight.trim()
       ? [{ icon: "flight", label: "Flight", value: trip.flight }]
       : []),
@@ -214,6 +267,18 @@ export default function ConfirmationModal({
                 </dl>
               </section>
 
+              <section aria-label="Route and fare" className="rounded-2xl border border-[#e5a910]/40 bg-[#fdf6e2] p-4 text-sm">
+                <div role="status" aria-live="polite">
+                  {quoteLoading && <p>Calculating driving distance and vehicle fares…</p>}
+                  {quoteError && <p>{quoteError}</p>}
+                  {quote && quote.legs.map((leg, index) => <p key={index} className="mb-2"><strong>{index === 0 ? "Outbound" : "Return"}:</strong> {formatDistance(leg.distanceMeters)} · approximately {formatDuration(leg.durationSeconds)}</p>)}
+                  {expired && <p className="font-semibold">Your quote has expired. Refresh prices before booking.</p>}
+                </div>
+                <p className="mt-2">Each leg includes 40 km. Every started 5 km beyond that is charged at your vehicle’s rate. Return trips include a separate base fare for each leg.</p>
+                {quote && <p className="mt-2 text-xs text-neutral-600">Driving distance by Google Maps. Travel time excludes live traffic. Quote valid for 15 minutes.</p>}
+                {(quoteError || expired) && <div className="mt-3 flex flex-wrap gap-4"><button type="button" disabled={quoteLoading || loading} onClick={() => { setQuoteAttempt((attempt) => attempt + 1); setErrors({}); }} className="font-semibold underline underline-offset-4">Refresh prices</button><Link href="/contact" className="font-semibold underline underline-offset-4">Request a custom quote</Link></div>}
+              </section>
+
               {/* Vehicle selection */}
               <section aria-label="Choose a vehicle">
                 <h3 className="font-label-lg text-label-lg font-bold text-[#0a0a0a] mb-3">
@@ -253,6 +318,7 @@ export default function ConfirmationModal({
                           role="radio"
                           aria-checked={on}
                           onClick={() => setVehicleId(v.id)}
+                          disabled={!quote || quoteLoading || expired || loading}
                           className={`w-full text-left flex items-center gap-4 p-3 rounded-2xl border-2 transition-all ${
                             on
                               ? "border-[#0a0a0a] bg-neutral-50"
@@ -289,12 +355,10 @@ export default function ConfirmationModal({
                           </div>
                           <div className="text-right shrink-0">
                             <div className="font-body-md text-body-md font-bold text-[#0a0a0a]">
-                              {formatKes(v.priceKes)}
+                              {fareFor(v.id) ? formatKes(fareFor(v.id)!.totalKes) : "—"}
                             </div>
                             <div className="font-label-sm text-label-sm text-neutral-400">
-                              {formatUsd(
-                                convertKesToUsd(v.priceKes, kesToUsd, v.priceUsd),
-                              )}
+                              {fareFor(v.id) && kesToUsd ? `≈ ${formatUsd(Math.round(fareFor(v.id)!.totalKes * kesToUsd))}` : ""}
                             </div>
                           </div>
                           <span
@@ -321,6 +385,12 @@ export default function ConfirmationModal({
                 )}
               </section>
 
+              {selectedFare && <section aria-label="Fare breakdown" className="rounded-2xl bg-neutral-100 p-4 text-sm space-y-2">
+                <h3 className="font-bold">Your fare breakdown</h3>
+                {selectedFare.legTotalsKes.map((total, index) => <p key={index}>{index === 0 ? "Outbound" : "Return"}: {formatKes(selectedFare.baseKes)} base + {selectedFare.extraBlocks[index]} × {formatKes(selectedFare.extraBlockKes)} = <strong>{formatKes(total)}</strong></p>)}
+                <p>Payable in KES. USD amounts are approximate{kesToUsd ? "." : " and currently unavailable."}</p>
+              </section>}
+              {errors.submit && <p role="alert" className="text-sm text-red-700">{errors.submit}</p>}
               {/* Payment Option Section */}
               <section aria-label="Payment options">
                 <h3 className="font-label-lg text-label-lg font-bold text-[#0a0a0a] mb-3">
@@ -440,15 +510,15 @@ export default function ConfirmationModal({
             <div className="sticky bottom-0 bg-white border-t border-neutral-200 px-6 sm:px-8 py-4 flex items-center gap-4">
               <div className="min-w-0">
                 <div className="font-label-sm text-label-sm text-neutral-500">
-                  Total (fixed, all-inclusive)
+                  Total fare (KES)
                 </div>
                 <div className="font-headline-sm text-headline-sm font-bold text-[#0a0a0a]">
-                  {selected ? formatKes(selected.priceKes) : "—"}
+                  {selectedFare ? formatKes(selectedFare.totalKes) : "—"}
                 </div>
               </div>
               <button
                 onClick={confirm}
-                disabled={loading}
+                disabled={loading || quoteLoading || !quote || expired || !selectedFare}
                 className="group ml-auto h-14 px-6 sm:px-10 bg-[#0a0a0a] hover:bg-[#1f1f1f] text-white rounded-xl font-headline-sm text-headline-sm flex items-center gap-3 transition-all active:scale-[0.99] disabled:opacity-50"
               >
                 {loading ? "Processing..." : "Confirm booking"}

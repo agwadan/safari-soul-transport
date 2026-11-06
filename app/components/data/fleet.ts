@@ -8,6 +8,7 @@ export type Vehicle = {
   maxPassengers: number;
   maxSuitcases: number;
   priceKes: number;
+  extraBlockKes: number;
   priceUsd: number;
   isPopular: boolean;
 };
@@ -28,6 +29,7 @@ export const fleet: Vehicle[] = [
     maxPassengers: 3,
     maxSuitcases: 2,
     priceKes: 3500,
+    extraBlockKes: 650,
     priceUsd: 25,
     isPopular: false,
   },
@@ -46,6 +48,7 @@ export const fleet: Vehicle[] = [
     maxPassengers: 2,
     maxSuitcases: 2,
     priceKes: 10000,
+    extraBlockKes: 1300,
     priceUsd: 75,
     isPopular: false,
   },
@@ -64,6 +67,7 @@ export const fleet: Vehicle[] = [
     maxPassengers: 6,
     maxSuitcases: 4,
     priceKes: 7000,
+    extraBlockKes: 1300,
     priceUsd: 55,
     isPopular: true,
   },
@@ -82,6 +86,7 @@ export const fleet: Vehicle[] = [
     maxPassengers: 28,
     maxSuitcases: 20,
     priceKes: 18000,
+    extraBlockKes: 1950,
     priceUsd: 140,
     isPopular: false,
   },

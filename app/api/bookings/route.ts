@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { fleet } from "../../components/data/fleet";
+import { QuoteError, verifyQuote } from "../../lib/quote-server";
+import { formatDistance, formatDuration } from "../../lib/pricing";
 
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+const escapeHtml = (value: string) =>
+  value.replace(
+    /[&<>"']/g,
+    (char) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        char
+      ]!,
+  );
 
 // List of your team member emails
 const TEAM_EMAILS = [
-  /* "stevenaraka@gmail.com", */
+  "stevenaraka@gmail.com",
   "agwa.dan@gmail.com",
   "safarisoul91@gmail.com",
   // Add as many team emails here as you need
@@ -15,20 +24,99 @@ const TEAM_EMAILS = [
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { trip, counts, vehicle, name, phone, email, paymentMethod } = body;
-
-    if (!email || !name || !vehicle) {
-        console.log('missing required fields'); 
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const quote = verifyQuote(body?.quoteToken);
+    const catalogVehicle = fleet.find((entry) => entry.id === body.vehicleId);
+    const fare = quote.fares.find(
+      (entry) => entry.vehicleId === body.vehicleId,
+    );
+    const counts = body.counts;
+    if (
+      !catalogVehicle ||
+      !fare ||
+      !counts ||
+      !Number.isInteger(counts.passengers) ||
+      counts.passengers < 1 ||
+      counts.passengers > catalogVehicle.maxPassengers ||
+      !Number.isInteger(counts.suitcases) ||
+      counts.suitcases < 0 ||
+      counts.suitcases > catalogVehicle.maxSuitcases ||
+      !Number.isInteger(counts.handbags) ||
+      counts.handbags < 0 ||
+      counts.handbags > 20 ||
+      typeof body.name !== "string" ||
+      !body.name.trim() ||
+      body.name.length > 100 ||
+      typeof body.email !== "string" ||
+      body.email.length > 254 ||
+      !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(body.email) ||
+      typeof body.phone !== "string" ||
+      !/^\+?[\d\s()-]{9,30}$/.test(body.phone) ||
+      body.paymentMethod !== "cash"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Please check the vehicle, passenger counts and contact details.",
+        },
+        { status: 400 },
+      );
     }
+    if (!process.env.RESEND_API_KEY)
+      return NextResponse.json(
+        {
+          error: "Booking notifications are unavailable. Please call dispatch.",
+        },
+        { status: 503 },
+      );
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const vehicle = { ...catalogVehicle, priceKes: fare.totalKes };
+    // Only server-signed addresses, dates and prices are used in the emails.
+    const trip = {
+      ...quote.trip,
+      pickup: escapeHtml(quote.trip.pickup),
+      destination: escapeHtml(quote.trip.destination),
+      flight: escapeHtml(quote.trip.flight),
+    };
+    const name = escapeHtml(body.name.trim());
+    const phone = body.phone.trim();
+    const email = body.email.trim();
+    const paymentMethod = body.paymentMethod;
+    const routeSummary =
+      quote.legs
+        .map(
+          (leg, index) =>
+            "<p><strong>" +
+            (index === 0 ? "Outbound" : "Return") +
+            ":</strong> " +
+            formatDistance(leg.distanceMeters) +
+            " · approx. " +
+            formatDuration(leg.durationSeconds) +
+            "<br/>KES " +
+            fare.baseKes.toLocaleString() +
+            " base + " +
+            fare.extraBlocks[index] +
+            " extra 5 km blocks × KES " +
+            fare.extraBlockKes.toLocaleString() +
+            " = KES " +
+            fare.legTotalsKes[index].toLocaleString() +
+            "</p>",
+        )
+        .join("") +
+      (trip.tripType === "return"
+        ? "<p><strong>Return pickup:</strong> " +
+          trip.returnDate +
+          " at " +
+          trip.returnTime +
+          " (EAT)</p>"
+        : "");
 
-    console.log('sending confirmation email to the customer');
+    console.log("sending confirmation email to the customer");
     // 1. Send confirmation email to the Customer
-      const customerEmailPromise = resend.emails.send({
-        from: "Safari Soul Dispatch <info@safarisoul.africa>",
-        to: [email],
-        subject: `Booking Confirmed: ${vehicle.name} (${trip.pickup} to ${trip.destination})`,
-        html: `
+    const customerEmailPromise = resend.emails.send({
+      from: "Safari Soul Dispatch <info@safarisoul.africa>",
+      to: [email],
+      subject: `Booking Confirmed: ${vehicle.name} (${trip.pickup} to ${trip.destination})`,
+      html: `
           <div style="margin:0;padding:32px 12px;background-color:#f4f4f6;font-family:Arial,Helvetica,sans-serif;color:#0a0a0a;">
             <div style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #e5e5e9;border-radius:14px;overflow:hidden;">
       
@@ -147,6 +235,7 @@ export async function POST(request: Request) {
                 </div>
               </div>
       
+              <div style="padding:0 32px 24px;font-size:13px;line-height:1.7;">${routeSummary}<p>Each leg includes 40 km. Additional distance is charged per started 5 km.</p></div>
               <!-- Fare -->
               <div style="padding:0 32px 28px;">
                 <div style="background:#0a0a0a;border-radius:10px;padding:22px 24px;">
@@ -194,7 +283,6 @@ export async function POST(request: Request) {
             </div>
           </div>
         `,
-      
     });
 
     // 2. Send notification email to the Internal Team
@@ -220,7 +308,8 @@ export async function POST(request: Request) {
             <p><strong>Date & Time:</strong> ${trip.date} at ${trip.time}</p>
             ${trip.flight ? `<p><strong>Flight Number:</strong> ${trip.flight}</p>` : ""}
             <p><strong>Party:</strong> ${counts.passengers} Pax, ${counts.suitcases} Suitcases, ${counts.handbags} Cabin Bags</p>
-            <p><strong>Payment Method:</strong> ${paymentMethod === 'cash' ? 'Cash to Driver' : paymentMethod}</p>
+            <p><strong>Payment Method:</strong> ${paymentMethod === "cash" ? "Cash to Driver" : paymentMethod}</p>
+            ${routeSummary}
             <p><strong>Total Revenue:</strong> KES ${vehicle.priceKes.toLocaleString()}</p>
           </div>
 
@@ -230,11 +319,17 @@ export async function POST(request: Request) {
     });
 
     // Run both emails concurrently
-    const [customerResult, teamResult] = await Promise.all([customerEmailPromise, teamEmailPromise]);
+    const [customerResult, teamResult] = await Promise.all([
+      customerEmailPromise,
+      teamEmailPromise,
+    ]);
     // Resend resolves with { data, error } on provider failures; it does not
     // necessarily throw. Check each result before confirming success.
     if (customerResult.error || teamResult.error) {
-      for (const [recipient, result] of [["customer", customerResult], ["team", teamResult]] as const) {
+      for (const [recipient, result] of [
+        ["customer", customerResult],
+        ["team", teamResult],
+      ] as const) {
         if (result.error) {
           console.error(`[bookings] Resend rejected ${recipient} email`, {
             name: result.error.name,
@@ -243,14 +338,33 @@ export async function POST(request: Request) {
           });
         }
       }
-      return NextResponse.json({ error: "We couldn’t send all booking notifications. Please contact our team to confirm your booking." }, { status: 502 });
+      return NextResponse.json(
+        {
+          error:
+            "We couldn’t send all booking notifications. Please contact our team to confirm your booking.",
+        },
+        { status: 502 },
+      );
     }
-    console.log('confirmation emails sent successfully ✅');
+    console.log("confirmation emails sent successfully ✅");
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof QuoteError)
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.status },
+      );
+    if (error instanceof SyntaxError)
+      return NextResponse.json(
+        { error: "Invalid booking details." },
+        { status: 400 },
+      );
     console.log("Resend error:", error);
-    console.log('failed to send confirmation emails');
-    return NextResponse.json({ error: "Failed to send confirmation emails" }, { status: 500 });
+    console.log("failed to send confirmation emails");
+    return NextResponse.json(
+      { error: "Failed to send confirmation emails" },
+      { status: 500 },
+    );
   }
 }

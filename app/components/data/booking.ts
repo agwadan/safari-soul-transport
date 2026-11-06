@@ -10,6 +10,8 @@ export type TripDetails = {
   tripType: TripType;
   pickup: string;
   destination: string;
+  pickupPlaceId: string;
+  destinationPlaceId: string;
   date: string; // YYYY-MM-DD
   time: string; // HH:mm (24h)
   returnDate: string; // only used when tripType === "return"
@@ -30,6 +32,8 @@ export const DEFAULT_TRIP: TripDetails = {
   tripType: "one-way",
   pickup: "",
   destination: "",
+  pickupPlaceId: "",
+  destinationPlaceId: "",
   date: "",
   time: "",
   returnDate: "",

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { convertKesToUsd, fleet, formatKes, formatUsd } from "../data/fleet";
+import { fleet, formatKes, formatUsd } from "../data/fleet";
 import Icon from "../ui/Icons";
 
 
@@ -93,11 +93,12 @@ export default function FleetShowcase({
                     )}
                   </div>
 
+                  <p className="mb-3 text-xs text-neutral-600">Then {formatKes(car.extraBlockKes)} per started 5 km. Kenya fares, per leg.</p>
                   {/* Price and Selection */}
                   <div className="mt-auto flex items-center justify-between gap-3 border-t border-border-hairline pt-4">
                     <div className="min-w-0 flex-1">
                       <span className="mb-1 block text-xs text-on-surface-variant sm:text-sm">
-                        Starting from
+                        Base fare · first 40 km
                       </span>
 
                       <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
@@ -106,17 +107,17 @@ export default function FleetShowcase({
                         </span>
 
                         <span className="text-xs text-on-surface-variant sm:text-sm">
-                          / {formatUsd(convertKesToUsd(car.priceKes, kesToUsd, car.priceUsd))}
+                          / {kesToUsd ? formatUsd(Math.round(car.priceKes * kesToUsd)) : "USD unavailable"}
                         </span>
                       </div>
                     </div>
 
-                    <button
-                      type="button"
+                    <a
+                      href="/#hero"
                       className="shrink-0 rounded-lg bg-[#0a0a0a] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#222222] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#b27c00] sm:px-5"
                     >
                       Select
-                    </button>
+                    </a>
                   </div>
                 </div>
               </div>

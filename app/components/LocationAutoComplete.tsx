@@ -75,6 +75,8 @@ export default function LocationAutocomplete({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const requestId = useRef(0);
+  const selectionId = useRef(0);
+  useEffect(() => () => { selectionId.current++; }, []);
 
   // Keep the session token in a ref so updating it doesn't retrigger
   // the autocomplete effect.
@@ -212,6 +214,7 @@ export default function LocationAutocomplete({
   }, [value, open, places, countryCodesKey]);
 
   async function selectSuggestion(item: Suggestion) {
+    const currentSelection = ++selectionId.current;
     // Ignore outstanding requests for the previous input.
     requestId.current++;
 
@@ -228,6 +231,7 @@ export default function LocationAutocomplete({
         fields: ["formattedAddress", "location"],
       });
 
+      if (currentSelection !== selectionId.current) return;
       const address = place.formattedAddress || item.text;
       const location = place.location;
 
@@ -240,6 +244,7 @@ export default function LocationAutocomplete({
         lng: location?.lng(),
       });
     } catch {
+      if (currentSelection !== selectionId.current) return;
       // The prediction remains usable if fetching place details fails.
       onSelect?.({
         address: item.text,
@@ -247,7 +252,7 @@ export default function LocationAutocomplete({
       });
     } finally {
       // A selection completes this autocomplete session.
-      sessionTokenRef.current = null;
+      if (currentSelection === selectionId.current) sessionTokenRef.current = null;
     }
   }
 
@@ -273,6 +278,7 @@ export default function LocationAutocomplete({
         value={value}
         onFocus={() => setOpen(true)}
         onChange={(event) => {
+          selectionId.current++;
           onChange(event.target.value);
           setOpen(true);
         }}

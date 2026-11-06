@@ -84,3 +84,65 @@ if spam becomes an issue; the honeypot is not a complete bot protection system.
 Before launch, verify a real enquiry reaches the team and that Reply replies to
 the customer. WhatsApp links and specific email/chat response hours are omitted
 pending confirmation. The existing site-wide dispatch banner is reused.
+
+## Distance-based Kenya fares
+
+The first 40,000 metres of each leg are covered by the vehicle's base fare.
+Each started 5,000 metres beyond that adds the vehicle's `extraBlockKes` charge:
+Mazda 3: KES 650; luxury sedan: KES 1,300; Toyota Noah: KES 1,300;
+Coaster: KES 1,950. Base fares and surcharges live in
+`app/components/data/fleet.ts`; the calculation lives in `app/lib/pricing.ts`.
+KES is authoritative. USD is an approximate conversion of the complete KES fare;
+it is omitted when exchange-rate data is unavailable.
+
+### Required configuration before deploying
+
+- Enable Google **Routes API** and **Places API (New)** with billing configured.
+- Set `GOOGLE_ROUTES_API_KEY` to a private server-side key authorized for those
+  APIs. Use appropriate server/IP restrictions for your hosting environment;
+  browser HTTP-referrer restrictions do not work for these server requests.
+- Keep `NEXT_PUBLIC_GOOGLE_PLACES_API_KEY` for the browser autocomplete as before.
+- Set `QUOTE_SIGNING_SECRET` to a random secret of at least 32 characters, shared
+  by all production instances. A random local value has been added to `.env`.
+  Generate a separate production value with
+  `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+- Add both private values to hosting environment variables, then redeploy.
+  Never prefix these two private variables with `NEXT_PUBLIC_`.
+
+The quote endpoint uses Places to verify both locations are in Kenya and Routes
+for driving distance and approximate duration without live traffic. It uses
+Google's default driving route, not straight-line distance. Each return direction
+is requested separately. Uganda and cross-border endpoints require a custom quote.
+Pickup times use East Africa Time. No extra toll, airport or waiting fee is added
+by this distance formula; review those business policies separately if needed.
+
+`POST /api/quotes` returns a 15-minute signed quote. `POST /api/bookings` requires
+that token and a catalog vehicle ID, verifies expiry/signature/capacity, and uses
+its canonical addresses and fare in both emails. Old clients submitting only a
+vehicle price are intentionally rejected; deploy the client and API together.
+Never deploy this change without the required configuration: online booking now
+requires a valid quote. Missing keys and route failures cannot fall back to the
+old flat fare. No real customer messages are sent by automated tests.
+
+Signed quotes protect fare integrity; they are not a booking database or a
+one-use payment token. Configure hosting rate limits on `/api/quotes` to control
+public Google API usage. Google requests are not persisted or cached by this code.
+
+Run `node --test tests/pricing.test.cjs` for pricing boundaries, return legs,
+Google failures, country checks, quote tampering/expiry, and booking-email totals.
+Before release, select real places, verify one-way and return quotes, edit a
+location and confirm prices refresh, and check mobile layout and email delivery.
+
+### Google access errors
+
+The server uses only `GOOGLE_ROUTES_API_KEY` for route calculation and location
+verification. This private key must permit both Routes API and Places API (New),
+and both APIs must be enabled in its Google Cloud project. There is no fallback
+to the public key: a missing server key makes online quotes unavailable.
+`NEXT_PUBLIC_GOOGLE_PLACES_API_KEY` remains in use for browser autocomplete.
+
+`API_KEY_SERVICE_BLOCKED` means the key's API restrictions block the requested
+service. Add Routes API to the allowed APIs without removing existing entries.
+The server now logs Google's service, HTTP status, error reason and message
+(with the active key redacted). Public error responses do not include credentials
+or Google project details.

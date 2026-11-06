@@ -66,15 +66,10 @@ const label =
 const iconPos =
   "pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2";
 
-const pad = (n: number) => String(n).padStart(2, "0");
-const todayLocal = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-};
-const nowLocalTime = () => {
-  const d = new Date();
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-};
+// Service pickup times are in East Africa Time, regardless of browser timezone.
+const eatNow = () => new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
+const todayLocal = () => eatNow().slice(0, 10);
+const nowLocalTime = () => eatNow().slice(11, 16);
 
 export default function BookingWidget({
   kesToUsd,
@@ -115,6 +110,10 @@ export default function BookingWidget({
     required.forEach((k) => {
       if (!trip[k].trim()) found[k] = "Required";
     });
+
+    if (!trip.pickupPlaceId) found.pickup = "Select a pickup from the suggestions";
+    if (!trip.destinationPlaceId) found.destination = "Select a destination from the suggestions";
+    if (trip.pickupPlaceId && trip.pickupPlaceId === trip.destinationPlaceId) found.destination = "Choose a different destination";
 
     if (trip.date && trip.date < todayLocal()) {
       found.date = "Date is in the past";
@@ -224,7 +223,8 @@ export default function BookingWidget({
               <LocationAutocomplete
                 id="pickup"
                 value={trip.pickup}
-                onChange={(value) => setTrip((t) => ({ ...t, pickup: value }))}
+                onChange={(value) => setTrip((t) => ({ ...t, pickup: value, pickupPlaceId: "" }))}
+                onSelect={(location) => setTrip((t) => ({ ...t, pickup: location.address, pickupPlaceId: location.placeId }))}
                 icon="my_location"
                 iconClassName="text-neutral-500"
                 inputClassName={`${field} pl-11 pr-3`}
@@ -240,8 +240,9 @@ export default function BookingWidget({
                 id="destination"
                 value={trip.destination}
                 onChange={(value) =>
-                  setTrip((t) => ({ ...t, destination: value }))
+                  setTrip((t) => ({ ...t, destination: value, destinationPlaceId: "" }))
                 }
+                onSelect={(location) => setTrip((t) => ({ ...t, destination: location.address, destinationPlaceId: location.placeId }))}
                 icon="location_on"
                 iconClassName="text-[#ba1a1a]"
                 inputClassName={`${field} pl-11 pr-3`}
@@ -274,7 +275,7 @@ export default function BookingWidget({
             </div>
             <div>
               <label htmlFor="time" className={label}>
-                Pickup Time
+                Pickup Time (EAT)
               </label>
               <div className="relative">
                 <Icon
@@ -319,7 +320,7 @@ export default function BookingWidget({
               </div>
               <div>
                 <label htmlFor="returnTime" className={label}>
-                  Return Pickup Time
+                  Return Pickup Time (EAT)
                 </label>
                 <div className="relative">
                   <Icon
